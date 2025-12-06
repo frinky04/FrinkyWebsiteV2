@@ -4,7 +4,6 @@ const posts = content.posts || [];
 const featured = content.featured || games.find((g) => g.featured) || games[0];
 
 let currentSection = "home";
-let lastSection = "home";
 
 const FEEDS = {
   posts: {
@@ -38,9 +37,8 @@ function normalizeContent(raw) {
   return lines.map((l) => l.slice(pad)).join("\n");
 }
 
-function showSection(section) {
+function showSection(section, pushHistory = false) {
   if (!section) return;
-  lastSection = currentSection;
   currentSection = section;
   document.querySelectorAll(".page-section").forEach((sec) => {
     const id = sec.id.replace("section-", "");
@@ -49,6 +47,9 @@ function showSection(section) {
   document.querySelectorAll("[data-nav]").forEach((link) => {
     link.classList.toggle("active", link.dataset.nav === section);
   });
+  if (pushHistory) {
+    history.pushState({ section }, "", `#${section}`);
+  }
 }
 
 function buildList(items, listEl, metaFn) {
@@ -187,9 +188,9 @@ function tintIcons(scope) {
 function openDetail(type, slug) {
   const entry = findEntry(type, slug);
   if (!entry) return;
-  lastSection = currentSection;
   setDetail(entry);
-  showSection("detail");
+  showSection("detail", false);
+  history.pushState({ section: "detail", type, slug }, "", "#detail");
 }
 
 function findEntry(type, slug) {
@@ -250,22 +251,31 @@ function setupNav() {
     link.addEventListener("click", (ev) => {
       ev.preventDefault();
       const target = link.dataset.nav;
-      showSection(target);
+      if (!target) return;
+      showSection(target, true);
     });
   });
-
-  const back = document.querySelector(".detail-back");
-  if (back) {
-    back.addEventListener("click", () => {
-      showSection(lastSection || "home");
-    });
-  }
 }
 
+window.addEventListener("popstate", (event) => {
+  const state = event.state;
+  if (state?.section === "detail" && state.type && state.slug) {
+    const entry = findEntry(state.type, state.slug);
+    if (entry) {
+      setDetail(entry);
+      showSection("detail", false);
+      return;
+    }
+  }
+  const section = state?.section || "home";
+  showSection(section, false);
+});
+
 document.addEventListener("DOMContentLoaded", () => {
+  history.replaceState({ section: "home" }, "", "#home");
   renderFeatured(featured);
   renderGamesGrid(games);
   renderLists();
   setupNav();
-  showSection("home");
+  showSection("home", false);
 });

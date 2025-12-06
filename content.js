@@ -17,6 +17,15 @@ const text = (strings, ...values) => {
 };
 
 window.CONTENT = {
+  site: {
+    title: "Finn Rawlings (Frinky)",
+    year: "2025",
+    nav: [
+      { label: "homepage", section: "home" },
+      { label: "contact", section: "contact" },
+      { label: "about", section: "about" },
+    ],
+  },
   featured: {
     title: "example project",
     date: "14 Oct 2025",

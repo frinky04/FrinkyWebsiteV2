@@ -243,17 +243,8 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 0 0 8px;
-}
-
-.detail-back {
-  background: #1a1a1a;
-  color: #dcdcdc;
-  border: 1px solid #333;
-  border-radius: 2px;
-  padding: 6px 10px;
-  font-size: 11px;
-  cursor: pointer;
+  padding: 4px 8px 10px;
+  margin: 0;
 }
 
 .detail-hero {
@@ -276,6 +267,9 @@ a:hover {
 .detail-title {
   font-size: 18px;
   letter-spacing: 1px;
+  margin: 0;
+  padding-left: 2px;
+  padding-top: 5px;
 }
 
 .detail-meta {
