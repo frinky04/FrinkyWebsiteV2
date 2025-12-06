@@ -44,15 +44,13 @@ window.CONTENT = {
       href: "#",
       image: "images/screen_wrap.png",
       content: text`
-        Paragraph one about this game. Mention mechanics, mood, and where to play.
-
-        Paragraph two can include links, credits, or quick patch highlights.
+        Quick blurb about this game. Mention mechanics, mood, and where to play.
       `,
     },
-    { title: "Project Echo", date: "02 Sep 2025", slug: "project-echo", href: "#", image: "" },
-    { title: "Signal Black", date: "18 Aug 2025", slug: "signal-black", href: "#", image: "" },
-    { title: "Rogue Lattice", date: "01 Aug 2025", slug: "rogue-lattice", href: "#", image: "" },
-    { title: "Delta Switch", date: "17 Jul 2025", slug: "delta-switch", href: "#", image: "" },
+    { title: "Project Echo", date: "02 Sep 2025", slug: "project-echo", href: "#", image: "", content: "Quick blurb for Project Echo." },
+    { title: "Signal Black", date: "18 Aug 2025", slug: "signal-black", href: "#", image: "", content: "Quick blurb for Signal Black." },
+    { title: "Rogue Lattice", date: "01 Aug 2025", slug: "rogue-lattice", href: "#", image: "", content: "Quick blurb for Rogue Lattice." },
+    { title: "Delta Switch", date: "17 Jul 2025", slug: "delta-switch", href: "#", image: "", content: "Quick blurb for Delta Switch." },
   ],
   posts: [
     {

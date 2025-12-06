@@ -16,6 +16,10 @@ const FEEDS = {
     items: content.experience || [],
     meta: (item) => item.meta ?? "",
   },
+  games: {
+    items: games,
+    meta: (item) => item.date || "",
+  },
 };
 
 function daysAgo(dateString) {
@@ -72,7 +76,11 @@ function buildList(items, listEl, metaFn) {
     link.textContent = item.title || item.text || "Untitled";
 
     meta.className = "meta";
-    meta.textContent = typeof metaFn === "function" ? metaFn(item) : item.meta ?? "";
+    if (item.date) {
+      meta.textContent = daysAgo(item.date);
+    } else {
+      meta.textContent = typeof metaFn === "function" ? metaFn(item) : item.meta ?? "";
+    }
 
     const fullContent = normalizeContent(item.content);
     if (fullContent) li.dataset.content = fullContent;
@@ -92,6 +100,7 @@ function buildList(items, listEl, metaFn) {
 
 function renderLists() {
   renderPostsList();
+  renderGamesList();
   const expList = document.querySelector("#experience-list");
   buildList(FEEDS.experience.items, expList, FEEDS.experience.meta);
 }
@@ -109,15 +118,29 @@ function renderPostsList() {
   }
 }
 
+function renderGamesList() {
+  const list = document.querySelector("#games-list");
+  if (!list) return;
+  buildList(FEEDS.games.items, list, FEEDS.games.meta);
+}
+
 function renderFeatured(game) {
   if (!game) return;
   const titleEl = document.querySelector("[data-slot='feature-title']");
-  const dateEl = document.querySelector("[data-slot='feature-date']");
   const windowEl = document.querySelector(".feature-window");
+  const blurbEl = document.querySelector("#feature-blurb");
   if (titleEl) titleEl.textContent = game.title || game.name || "Untitled";
-  if (dateEl) dateEl.textContent = game.date || "";
   const fallbackImage = findEntry("game", game.slug || "")?.image || games.find((g) => g.image)?.image;
   setFeatureBackground(game.image || fallbackImage);
+  if (blurbEl) {
+    const datePart = game.date ? `${game.date}` : "";
+    const ago = game.date ? ` (${daysAgo(game.date)})` : "";
+    const body = normalizeContent(game.content) || "No description available.";
+    blurbEl.innerHTML = `
+      <div class="detail-meta">${datePart}${ago}</div>
+      <div class="blurb-body">${body.replace(/\n/g, "<br>")}</div>
+    `;
+  }
   if (windowEl) {
     const hasHref = Boolean(game.href);
     const hasSlug = Boolean(game.slug);
@@ -163,68 +186,6 @@ function setFeatureBackground(image) {
     win.style.backgroundPosition = "";
     win.style.backgroundBlendMode = "";
   }
-}
-
-function renderGamesGrid(items) {
-  const grid = document.querySelector("#games-grid");
-  if (!grid || !items) return;
-  grid.innerHTML = "";
-
-  items.forEach((game, idx) => {
-    const cell = document.createElement("div");
-    cell.className = "item";
-    cell.title = game.title || game.name || "Game";
-
-    if (game.slug) {
-      cell.dataset.slug = game.slug;
-      cell.dataset.type = "game";
-      cell.style.cursor = "pointer";
-      cell.addEventListener("click", () => openDetail("game", game.slug));
-    } else if (game.href) {
-      cell.style.cursor = "pointer";
-      cell.addEventListener("click", () => {
-        window.location.href = game.href;
-      });
-    }
-
-    if (game.image) {
-      cell.classList.add("has-image");
-      cell.style.backgroundImage = `
-        linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.5)),
-        url('${game.image}')
-      `;
-      cell.style.backgroundSize = "cover, cover";
-      cell.style.backgroundPosition = "center, center";
-      cell.style.backgroundBlendMode = "overlay, normal";
-    } else {
-      cell.classList.add("needs-tint");
-      cell.dataset.tintIndex = idx;
-    }
-
-    grid.appendChild(cell);
-  });
-
-  tintIcons(grid);
-}
-
-function tintIcons(scope) {
-  const colors = [
-    ["#ffd166", "#8f5200"],
-    ["#ef476f", "#5d102b"],
-    ["#06d6a0", "#0a3b2f"],
-    ["#118ab2", "#0c2e40"],
-    ["#f2e94e", "#574c00"],
-    ["#c77dff", "#3a1b5d"],
-    ["#ff9b85", "#531f10"],
-  ];
-
-  (scope || document)
-    .querySelectorAll(".item.needs-tint")
-    .forEach((item, idx) => {
-      const baseIndex = Number(item.dataset.tintIndex ?? idx);
-      const pair = colors[baseIndex % colors.length];
-      item.style.background = `linear-gradient(145deg, ${pair[0]}, ${pair[1]})`;
-    });
 }
 
 function openDetail(type, slug) {
@@ -332,7 +293,6 @@ window.addEventListener("popstate", (event) => {
 document.addEventListener("DOMContentLoaded", () => {
   history.replaceState({ section: "home" }, "", "#home");
   renderFeatured(featured);
-  renderGamesGrid(games);
   renderLists();
   setupNav();
   showSection("home", false);

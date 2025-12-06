@@ -298,8 +298,8 @@ a:hover {
 /* Catalogue */
 .catalogue-grid {
   display: grid;
-  grid-template-columns: 1.7fr 1fr;
-  gap: 14px;
+  grid-template-columns: 1fr;
+  gap: 12px;
   align-items: start;
 }
 
@@ -307,6 +307,7 @@ a:hover {
   background: linear-gradient(#131313, #0c0c0c);
   border: 1px solid #202020;
   box-shadow: inset 0 0 0 1px #0a0a0a;
+  margin-bottom: 12px;
 }
 
 .feature-header,
@@ -325,10 +326,17 @@ a:hover {
   margin-left: 6px;
 }
 
+.feature-body {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
 .feature-window {
   position: relative;
-  height: 260px;
-  width: 100%;
+  min-height: 240px;
+  aspect-ratio: 4 / 3;
   background:
     radial-gradient(circle at 60% 50%, rgba(50, 50, 50, 0.18), transparent 42%),
     linear-gradient(0deg, rgba(255, 255, 255, 0.05) 49%, rgba(0, 0, 0, 0.35) 51%),
@@ -340,6 +348,21 @@ a:hover {
   background-position: center;
   background-repeat: no-repeat;
   background-color: #0f0f0f;
+}
+
+.feature-blurb {
+  background: linear-gradient(#111, #0c0c0c);
+  border: 1px solid #1f1f1f;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px #0a0a0a;
+  padding: 10px 12px;
+  color: #d2d2d2;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.feature-blurb .detail-meta {
+  margin-bottom: 6px;
 }
 
 .feature-window.clickable {
@@ -386,28 +409,19 @@ a:hover {
   color: var(--muted);
 }
 
-.item-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+.blurb-grid {
+  background: linear-gradient(#111, #0b0b0b);
+  border: 1px solid #1f1f1f;
+  padding: 10px 12px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px #0a0a0a;
 }
 
-.item {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  background: linear-gradient(135deg, #2d2d2d, #121212);
-  border: 1px solid #2d2d2d;
-  border-radius: 10px;
-  position: relative;
-  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.55), 0 0 10px rgba(0, 0, 0, 0.35);
-}
-
-.item[role="link"] {
-  cursor: pointer;
-}
-
-.item.has-image {
-  background-color: #0a0a0a;
+.blurb {
+  color: #cfcfcf;
+  font-size: 13px;
+  line-height: 1.4;
+  min-height: 40px;
 }
 
 /* Lists */
