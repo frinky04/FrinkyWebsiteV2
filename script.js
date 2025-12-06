@@ -143,16 +143,18 @@ function renderFeatured(game) {
   const titleEl = document.querySelector("[data-slot='feature-title']");
   const windowEl = document.querySelector(".feature-window");
   const blurbEl = document.querySelector("#feature-blurb");
-  if (titleEl) titleEl.textContent = game.title || game.name || "Untitled";
+  if (titleEl) titleEl.textContent = "";
   const fallbackImage = findEntry("game", game.slug || "")?.image || games.find((g) => g.image)?.image;
   setFeatureBackground(game.image || fallbackImage);
   if (blurbEl) {
+    const title = game.title || game.name || "Untitled";
     const datePart = game.date ? `${game.date}` : "";
     const ago = game.date ? ` (${daysAgo(game.date)})` : "";
     const body = normalizeContent(game.content) || "No description available.";
     blurbEl.innerHTML = `
-      <div class="detail-meta">${datePart}${ago}</div>
+      <div class="feature-blurb-title">${title}</div>
       <div class="blurb-body">${body.replace(/\n/g, "<br>")}</div>
+      <div class="detail-meta">${datePart}${ago}</div>
     `;
   }
   if (windowEl) {

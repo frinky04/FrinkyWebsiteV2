@@ -374,10 +374,25 @@ a:hover {
   color: #d2d2d2;
   font-size: 13px;
   line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-blurb-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f6f6f6;
+  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+}
+
+.blurb-body {
+  flex-grow: 1;
 }
 
 .feature-blurb .detail-meta {
-  margin-bottom: 6px;
+  margin-top: 8px;
+  margin-bottom: 0;
 }
 
 .feature-window.clickable {
