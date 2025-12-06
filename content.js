@@ -29,7 +29,6 @@ window.CONTENT = {
     title: "Transience",
     date: "05 Dec 2025",
     slug: "transience",
-    href: "https://store.steampowered.com/app/2124100/Transience/",
     image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2124100/a2aa0043fdb796e58fc3eb17e47ac77d7dd1c1a8/ss_a2aa0043fdb796e58fc3eb17e47ac77d7dd1c1a8.1920x1080.jpg?t=1764875081",
     content: text`
     Become an Accountant - a hired mercenary who keeps the books balanced by any means necessary. This time though, you are the intended target. Take a journey through New Houston in the year 2056 and follow one man's tale of revenge as he escapes Transience.
