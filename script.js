@@ -229,7 +229,7 @@ function setDetail(entry) {
   if (bodyEl) {
     const normalized = normalizeContent(entry.content) || "More details coming soon.";
     const parts = normalized.split(/\n{2,}/);
-    bodyEl.innerHTML = parts
+    const contentHTML = parts
       .map((p) => {
         if (p.trim().startsWith("-")) {
           const items = p
@@ -243,6 +243,12 @@ function setDetail(entry) {
         return `<p>${p.replace(/\n/g, "<br>")}</p>`;
       })
       .join("");
+
+    const downloadButton = entry.downloadUrl
+      ? `<a href="${entry.downloadUrl}" target="_blank" rel="noopener noreferrer" class="download-btn">Download / Play</a>`
+      : "";
+
+    bodyEl.innerHTML = contentHTML + downloadButton;
   }
   setDetailHero(entry.image);
 }

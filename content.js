@@ -37,32 +37,65 @@ window.CONTENT = {
   },
   games: [
     {
+      title: "bang shoot.",
+      date: "Coming Soon",
+      slug: "bang-shoot",
+      href: "#",
+      image: "images/bang-shoot.jpg",
+      downloadUrl: "https://store.steampowered.com/app/3264590/bang_shoot/",
+      content: text`
+      A fast-paced arena shooter where you wield two weapons at once across unique battlegrounds. Each round is different—new map, teams, weapons, and modifiers.
+      `,
+    },
+    {
+      title: "Transience",
+      date: "05 Dec 2025",
+      slug: "transience",
+      href: "#",
+      image: "images/transience.png",
+      downloadUrl: "https://store.steampowered.com/app/2124100/Transience/",
+      content: text`
+      Become an Accountant - a hired mercenary who keeps the books balanced by any means necessary. This time though, you are the intended target. Take a journey through New Houston in the year 2056 and follow one man's tale of revenge as he escapes Transience.
+      `,
+    },
+    {
       title: "screen wrap.",
       date: "02 Aug 2025",
       slug: "screen-wrap",
       href: "#",
       image: "images/screen_wrap.png",
+      downloadUrl: "https://frinkyyy.itch.io/screenwrap",
       content: text`
-      a short, top down, atmospheric puzzle game about boundary warp, screen wrap, whatever you want to call it. 
+      a short, top down, atmospheric puzzle game about boundary warp, screen wrap, whatever you want to call it.
 
-      built by frinky & daniel in 4 days for the GMTK game jam. 
+      built by frinky & daniel in 4 days for the GMTK game jam.
 
 
       - puzzles
       - 3 levels
       - light stealth
-      - inventory system 
+      - inventory system
       - spooks 👻
-      
-      https://frinkyyy.itch.io/screenwrap
+      `,
+    },
+    {
+      title: "Dishwashing Simulator",
+      date: "03 April 2024",
+      slug: "dishwashing-simulator",
+      href: "#",
+      image: "images/dishwashing-simulator.jpg",
+      downloadUrl: "https://store.steampowered.com/app/2747780/Dishwashing_Simulator/",
+      content: text`
+      A short, unique survival-farming-base-building-tycoon-horror game where you must survive through washing dishes. Explore mysterious depths, manage resources, and unravel a cryptic narrative. In DWS, a chore becomes a journey to freedom.
       `,
     },
     {
       title: "infinite golf",
-      date: "02 Aug 2025",
+      date: "07 Feb 2024",
       slug: "infinite-golf",
       href: "#",
       image: "images/infinite_golf.png",
+      downloadUrl: "https://frinkyyy.itch.io/infinite-golf",
       content: text`
       I decided to give Godot a try, and this game is the result.
 
@@ -72,8 +105,28 @@ window.CONTENT = {
       - Discord Rich Presence integration.
       - Original music and art
       - Lightweight and simple
-
-      https://frinkyyy.itch.io/infinite-golf
+      `,
+    },
+    {
+      title: "GROUND-UNBOUND",
+      date: "08 Oct 2021",
+      slug: "ground-unbound",
+      href: "#",
+      image: "images/ground-unbound.jpg",
+      downloadUrl: "https://store.steampowered.com/app/1760020/GROUNDUNBOUND/",
+      content: text`
+      GROUND-UNBOUND is a procedurally generated, high-intensity movement shooter with a retro wave art style. It features roguelike mechanics with a number of skills, guns and abilities to play with, including a variety of enemy types. Created during the 7-Day BigFry Game Jam, updated for steam release.
+      `,
+    },
+    {
+      title: "Chaos",
+      date: "28 April 2020",
+      slug: "chaos",
+      href: "#",
+      image: "images/chaos.jpg",
+      downloadUrl: "https://store.steampowered.com/app/1230410/Chaos/",
+      content: text`
+      Chaos is an online FPS game. Why should you play it? Destruction, lots of it, plus some explosions, oh yeah, guns! Who doesn't like guns and explosions?
       `,
     },
   ],
@@ -103,9 +156,6 @@ window.CONTENT = {
     { date: "24 Jun 2025", title: "Wishlist reminder for upcoming project", slug: "wishlist-reminder", href: "#" },
   ],
   experience: [
-    { date: "2023 - Present", title: "Lead Developer, Independent Projects", meta: "Remote" },
-    { date: "2021 - 2023", title: "Game Designer, Example Studio", meta: "Helsinki" },
-    { date: "2019 - 2021", title: "Technical Artist, Sample Collective", meta: "Berlin" },
-    { date: "2016 - 2019", title: "Freelance Developer, Various Clients", meta: "Global" },
+    { date: "2022 - Present", title: "Remote, Full-time, Programmer, Gameplay Designer", meta: "Transience, RESURGENT" },
   ],
 };
