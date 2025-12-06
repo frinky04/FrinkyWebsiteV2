@@ -113,9 +113,37 @@ function renderFeatured(game) {
   if (!game) return;
   const titleEl = document.querySelector("[data-slot='feature-title']");
   const dateEl = document.querySelector("[data-slot='feature-date']");
+  const windowEl = document.querySelector(".feature-window");
   if (titleEl) titleEl.textContent = game.title || game.name || "Untitled";
   if (dateEl) dateEl.textContent = game.date || "";
-  setFeatureBackground(game.image);
+  const fallbackImage = findEntry("game", game.slug || "")?.image || games.find((g) => g.image)?.image;
+  setFeatureBackground(game.image || fallbackImage);
+  if (windowEl) {
+    const hasHref = Boolean(game.href);
+    const hasSlug = Boolean(game.slug);
+    windowEl.classList.toggle("clickable", hasHref || hasSlug);
+    windowEl.onclick = null;
+    windowEl.onkeydown = null;
+    windowEl.tabIndex = hasHref || hasSlug ? 0 : -1;
+
+    const handleActivate = () => {
+      if (hasHref) {
+        window.location.href = game.href;
+      } else if (hasSlug) {
+        openDetail("game", game.slug);
+      }
+    };
+
+    if (hasHref || hasSlug) {
+      windowEl.addEventListener("click", handleActivate);
+      windowEl.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          handleActivate();
+        }
+      });
+    }
+  }
 }
 
 function setFeatureBackground(image) {
@@ -123,13 +151,12 @@ function setFeatureBackground(image) {
   if (!win) return;
   if (image) {
     win.style.backgroundImage = `
-      linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%),
-      linear-gradient(135deg, #2c2c2c, #0a0a0a),
-      url('${image}')
+      url('${image}'),
+      linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.75) 100%)
     `;
-    win.style.backgroundSize = "cover, auto, cover";
-    win.style.backgroundPosition = "center, center, center";
-    win.style.backgroundBlendMode = "overlay, normal, normal";
+    win.style.backgroundSize = "cover, cover";
+    win.style.backgroundPosition = "center, center";
+    win.style.backgroundBlendMode = "normal, overlay";
   } else {
     win.style.backgroundImage = "";
     win.style.backgroundSize = "";
@@ -153,6 +180,11 @@ function renderGamesGrid(items) {
       cell.dataset.type = "game";
       cell.style.cursor = "pointer";
       cell.addEventListener("click", () => openDetail("game", game.slug));
+    } else if (game.href) {
+      cell.style.cursor = "pointer";
+      cell.addEventListener("click", () => {
+        window.location.href = game.href;
+      });
     }
 
     if (game.image) {
@@ -191,7 +223,7 @@ function tintIcons(scope) {
     .forEach((item, idx) => {
       const baseIndex = Number(item.dataset.tintIndex ?? idx);
       const pair = colors[baseIndex % colors.length];
-      item.style.background = `radial-gradient(circle at 40% 35%, ${pair[0]}, ${pair[1]} 65%, #0a0a0a 85%)`;
+      item.style.background = `linear-gradient(145deg, ${pair[0]}, ${pair[1]})`;
     });
 }
 

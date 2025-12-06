@@ -42,7 +42,7 @@ window.CONTENT = {
       date: "14 Oct 2025",
       slug: "example-project",
       href: "#",
-      image: "1.png",
+      image: "images/screen_wrap.png",
       content: text`
         Paragraph one about this game. Mention mechanics, mood, and where to play.
 
@@ -53,13 +53,6 @@ window.CONTENT = {
     { title: "Signal Black", date: "18 Aug 2025", slug: "signal-black", href: "#", image: "" },
     { title: "Rogue Lattice", date: "01 Aug 2025", slug: "rogue-lattice", href: "#", image: "" },
     { title: "Delta Switch", date: "17 Jul 2025", slug: "delta-switch", href: "#", image: "" },
-    { title: "Brass Needle", date: "04 Jul 2025", slug: "brass-needle", href: "#", image: "" },
-    { title: "Night Ferry", date: "19 Jun 2025", slug: "night-ferry", href: "#", image: "" },
-    { title: "Horizon Fold", date: "29 May 2025", slug: "horizon-fold", href: "#", image: "" },
-    { title: "Dust Relay", date: "10 May 2025", slug: "dust-relay", href: "#", image: "" },
-    { title: "Static Bloom", date: "21 Apr 2025", slug: "static-bloom", href: "#", image: "" },
-    { title: "Glass Choir", date: "02 Apr 2025", slug: "glass-choir", href: "#", image: "" },
-    { title: "Vapor Spine", date: "14 Mar 2025", slug: "vapor-spine", href: "#", image: "" },
   ],
   posts: [
     {
