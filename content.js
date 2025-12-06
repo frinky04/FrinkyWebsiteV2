@@ -36,7 +36,7 @@ window.CONTENT = {
   },
   games: [
     {
-      title: "bang shoot.",
+      title: "Bang Shoot",
       date: "Coming Soon",
       slug: "bang-shoot",
       href: "#",
@@ -58,7 +58,7 @@ window.CONTENT = {
       `,
     },
     {
-      title: "screen wrap.",
+      title: "Screen Wrap",
       date: "02 Aug 2025",
       slug: "screen-wrap",
       href: "#",
@@ -89,7 +89,7 @@ window.CONTENT = {
       `,
     },
     {
-      title: "infinite golf",
+      title: "Infinite Golf",
       date: "07 Feb 2024",
       slug: "infinite-golf",
       href: "#",
@@ -107,7 +107,7 @@ window.CONTENT = {
       `,
     },
     {
-      title: "GROUND-UNBOUND",
+      title: "Ground Unbound",
       date: "08 Oct 2021",
       slug: "ground-unbound",
       href: "#",
@@ -132,7 +132,7 @@ window.CONTENT = {
   posts: [
     {
       date: "07 Dec 2025",
-      title: "New Website",
+      title: "New website",
       slug: "prototype-release",
       href: "#",
       content: text`
@@ -141,8 +141,17 @@ window.CONTENT = {
         Transience is out now! Go check it out on Steam. Or don't, I don't mind.
       `,
     },
+    {
+      date: "24 Sep 2004",
+      title: "I was born",
+      slug: "birth",
+      href: "#",
+      content: text`
+        Spawned into the world on this day.
+      `,
+    },
   ],
   experience: [
-    { date: "2022 - Present", title: "Remote, Full-time, Programmer, Gameplay Designer", meta: "Transience @ RESURGENT" },
+    { date: "2022 - Present", title: "Full-time Remote Programmer & Gameplay Designer", meta: "Transience @ RESURGENT" },
   ],
 };

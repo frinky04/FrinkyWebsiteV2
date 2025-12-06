@@ -108,13 +108,18 @@ a:hover {
 .nav {
   color: var(--muted);
   font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.nav a {
+.nav-left a,
+.nav-right a {
   margin-right: 16px;
 }
 
-.nav a:last-child {
+.nav-left a:last-child,
+.nav-right a:last-child {
   margin-right: 0;
 }
 
