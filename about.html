@@ -5,38 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About | Finn Rawlings</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="content.js" defer></script>
+  <script src="layout.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="page">
-    <div class="frame">
-      <div class="inner" id="top">
-        <header class="top">
-          <div>
-            <div class="title">Finn Rawlings</div>
-          </div>
-          <div class="year">© 2023</div>
-        </header>
+  <div id="app"></div>
 
-        <section class="nav-box">
-          <div class="nav">
-            <a href="index.html#top">homepage</a> ... <a href="contact.html">contact</a> ... <a href="about.html">about</a>
-          </div>
-        </section>
-
-        <section class="section about">
-          <div class="section-head">
-            <h2>About</h2>
-            <span class="view-all muted">edit this copy</span>
-          </div>
-          <p class="body-text">
-            Use this space to introduce yourself, your craft, and your favorite tools. Add a short origin story, your current focus, and what kinds of collaborations you’re open to.
-          </p>
-          <p class="body-text" style="margin-top:8px;">
-            You can also drop links to portfolios, talks, or social profiles here.
-          </p>
-        </section>
+  <template id="page-content">
+    <section class="section about">
+      <div class="section-head">
+        <h2>About</h2>
+        <span class="view-all muted">edit this copy</span>
       </div>
-    </div>
-  </div>
+      <p class="body-text">
+        Use this space to introduce yourself, your craft, and your favorite tools. Add a short origin story, your current focus, and what kinds of collaborations you’re open to.
+      </p>
+      <p class="body-text" style="margin-top:8px;">
+        You can also drop links to portfolios, talks, or social profiles here.
+      </p>
+    </section>
+  </template>
 </body>
 </html>

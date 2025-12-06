@@ -5,86 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Finn Rawlings | Clone</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="content.js" defer></script>
+  <script src="layout.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="page">
-    <div class="frame">
-      <div class="inner" id="top">
-        <header class="top">
-          <div>
-            <div class="title">Finn Rawlings (Frinky)</div>
-          </div>
-          <div class="year">© 2025</div>
-        </header>
+  <div id="app"></div>
 
-        <section class="nav-box">
-          <div class="nav">
-            <a href="index.html#top">homepage</a> <a href="contact.html">contact</a> <a href="about.html">about</a>
-          </div>
-        </section>
+  <template id="page-content">
+    <section class="intro" id="home">
+      <p>
+        Welcome to my site! I make experimental projects and share them on the internet, all of which you can
+        find here. Most of them involve detailed machinery, atmospheric environments,
+        suspense, and other fun stuff like that.
+      </p>
+      <p>
+        Feel free to pick something from the catalogue, and have fun!
+      </p>
+    </section>
 
-        <section class="intro" id="home">
-          <p>
-            Welcome to my site! I make experimental projects and share them on the internet, all of which you can
-            find here. Most of them involve detailed machinery, atmospheric environments,
-            suspense, and other fun stuff like that.
-          </p>
-          <p>
-            Feel free to pick something from the catalogue, and have fun!
-          </p>
-        </section>
-
-        <section class="section games">
-          <div class="section-head">
-            <h2>Games</h2>
-            <a href="#" class="view-all">view all</a>
-          </div>
-          <div class="catalogue-grid">
-            <div class="feature-card">
-              <div class="feature-header">LATEST</div>
-              <div class="feature-window">
-                <div class="scanlines"></div>
-                <div class="feature-overlay">
-                  <div class="feature-title">example project</div>
-                </div>
-              </div>
-            </div>
-            <div class="item-grid" aria-label="catalogue items">
-              <div class="item"></div>
-              <div class="item"></div>
-              <div class="item"></div>
-              <div class="item"></div>
-              <div class="item"></div>
-              <div class="item"></div>
-              <div class="item"></div>
-              <div class="item"></div>
-              <div class="item"></div>
-              <div class="item"></div>
-              <div class="item"></div>
-              <div class="item"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="section posts">
-          <div class="section-head">
-            <h2>Posts</h2>
-            <a href="#" class="view-all">view all</a>
-          </div>
-          <ul class="list" id="registry-list"></ul>
-        </section>
-
-        <section class="section experience">
-          <div class="section-head">
-            <h2>Experience</h2>
-            <span class="view-all muted">selected roles</span>
-          </div>
-          <ul class="list" id="experience-list"></ul>
-        </section>
+    <section class="section games">
+      <div class="section-head">
+        <h2>Games</h2>
+        <a href="#" class="view-all">view all</a>
       </div>
-    </div>
-  </div>
+      <div class="catalogue-grid">
+        <div class="feature-card">
+          <div class="feature-header">LATEST</div>
+          <div class="feature-window">
+            <div class="scanlines"></div>
+            <div class="feature-overlay">
+              <div class="feature-title" data-slot="feature-title">example project</div>
+            </div>
+          </div>
+        </div>
+        <div class="item-grid" aria-label="catalogue items" id="games-grid"></div>
+      </div>
+    </section>
 
-  <script src="script.js"></script>
+    <section class="section posts">
+      <div class="section-head">
+        <h2>Posts</h2>
+        <a href="#" class="view-all">view all</a>
+      </div>
+      <ul class="list" id="registry-list" data-feed="posts"></ul>
+    </section>
+
+    <section class="section experience">
+      <div class="section-head">
+        <h2>Experience</h2>
+        <span class="view-all muted">selected roles</span>
+      </div>
+      <ul class="list" id="experience-list" data-feed="experience"></ul>
+    </section>
+  </template>
 </body>
 </html>
