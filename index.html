@@ -61,7 +61,7 @@
         <section class="section posts">
           <div class="section-head">
             <h2>Posts</h2>
-            <a href="#" class="view-all" data-view="posts">view all</a>
+            <a href="#" class="view-all" data-action="view-all-posts">view all</a>
           </div>
           <ul class="list" id="registry-list" data-feed="posts"></ul>
         </section>
@@ -72,6 +72,14 @@
             </div>
             <ul class="list" id="experience-list" data-feed="experience"></ul>
           </section>
+        </section>
+
+        <section class="page-section section posts hidden" id="section-posts-all">
+          <div class="section-head">
+            <h2>All Posts</h2>
+            <a href="#" class="view-all" data-action="back-home">back</a>
+          </div>
+          <ul class="list" id="all-posts-list" data-feed="posts"></ul>
         </section>
 
         <section class="page-section section about hidden" id="section-about">

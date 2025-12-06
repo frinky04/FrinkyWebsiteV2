@@ -4,7 +4,6 @@ const posts = content.posts || [];
 const featured = content.featured || games.find((g) => g.featured) || games[0];
 
 let currentSection = "home";
-let showAllPosts = false;
 const MAX_POSTS = 8;
 
 const FEEDS = {
@@ -101,6 +100,7 @@ function buildList(items, listEl, metaFn) {
 function renderLists() {
   renderPostsList();
   renderGamesList();
+  renderAllPostsList();
   const expList = document.querySelector("#experience-list");
   buildList(FEEDS.experience.items, expList, FEEDS.experience.meta);
 }
@@ -108,20 +108,20 @@ function renderLists() {
 function renderPostsList() {
   const list = document.querySelector("#registry-list");
   if (!list) return;
-  const items = showAllPosts ? posts : posts.slice(0, MAX_POSTS);
+  const items = posts.slice(0, MAX_POSTS);
   buildList(items, list, FEEDS.posts.meta);
-
-  const toggle = document.querySelector("[data-view='posts']");
-  if (toggle) {
-    toggle.textContent = showAllPosts ? "view recent" : "view all";
-    toggle.style.display = posts.length > MAX_POSTS ? "inline" : "none";
-  }
 }
 
 function renderGamesList() {
   const list = document.querySelector("#games-list");
   if (!list) return;
   buildList(FEEDS.games.items, list, FEEDS.games.meta);
+}
+
+function renderAllPostsList() {
+  const list = document.querySelector("#all-posts-list");
+  if (!list) return;
+  buildList(posts, list, FEEDS.posts.meta);
 }
 
 function renderFeatured(game) {
@@ -265,13 +265,20 @@ function setupNav() {
       showSection(target, false);
     });
   });
-
-  const postsToggle = document.querySelector("[data-view='posts']");
-  if (postsToggle) {
-    postsToggle.addEventListener("click", (ev) => {
+  const postsAll = document.querySelector("[data-action='view-all-posts']");
+  if (postsAll) {
+    postsAll.addEventListener("click", (ev) => {
       ev.preventDefault();
-      showAllPosts = !showAllPosts;
-      renderPostsList();
+      history.pushState({ section: "posts-all" }, "", "#posts-all");
+      showSection("posts-all", false);
+    });
+  }
+  const backHome = document.querySelector("[data-action='back-home']");
+  if (backHome) {
+    backHome.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      history.pushState({ section: "home" }, "", "#home");
+      showSection("home", false);
     });
   }
 }
