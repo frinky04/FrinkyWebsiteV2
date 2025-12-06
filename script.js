@@ -9,14 +9,17 @@ const MAX_POSTS = 8;
 const FEEDS = {
   posts: {
     items: posts,
+    type: "post",
     meta: (item) => item.meta ?? (item.date ? daysAgo(item.date) : ""),
   },
   experience: {
     items: content.experience || [],
+    type: "experience",
     meta: (item) => item.meta ?? "",
   },
   games: {
     items: games,
+    type: "game",
     meta: (item) => item.date || "",
   },
 };
@@ -57,38 +60,40 @@ function showSection(section, pushHistory = false) {
   }
 }
 
-function buildList(items, listEl, metaFn) {
-  if (!listEl || !items) return;
+function buildList(feed, listEl) {
+  if (!listEl || !feed?.items) return;
   listEl.innerHTML = "";
+  const { items, meta: metaFn, type } = feed;
 
   items.forEach((item) => {
     const li = document.createElement("li");
     const date = document.createElement("div");
-    const link = document.createElement("a");
+    const isDetailable = Boolean(item.slug && (type === "post" || type === "game"));
+    const link = document.createElement(isDetailable ? "a" : "div");
     const meta = document.createElement("div");
 
     date.className = "date";
     date.textContent = item.date ? `[${item.date}]` : "";
 
     link.className = "link";
-    link.href = "#";
+    if (isDetailable) link.href = "#";
     link.textContent = item.title || item.text || "Untitled";
 
     meta.className = "meta";
-    if (item.date) {
-      meta.textContent = daysAgo(item.date);
-    } else {
-      meta.textContent = typeof metaFn === "function" ? metaFn(item) : item.meta ?? "";
-    }
+    meta.textContent = item.date
+      ? daysAgo(item.date)
+      : typeof metaFn === "function"
+      ? metaFn(item)
+      : item.meta ?? "";
 
     const fullContent = normalizeContent(item.content);
     if (fullContent) li.dataset.content = fullContent;
-    if (item.slug) {
+    if (isDetailable) {
       li.dataset.slug = item.slug;
-      li.dataset.type = "post";
+      li.dataset.type = type;
       link.addEventListener("click", (ev) => {
         ev.preventDefault();
-        openDetail("post", item.slug);
+        openDetail(type, item.slug);
       });
     }
 
@@ -101,27 +106,34 @@ function renderLists() {
   renderPostsList();
   renderGamesList();
   renderAllPostsList();
+  renderAllGamesList();
   const expList = document.querySelector("#experience-list");
-  buildList(FEEDS.experience.items, expList, FEEDS.experience.meta);
+  buildList(FEEDS.experience, expList);
 }
 
 function renderPostsList() {
   const list = document.querySelector("#registry-list");
   if (!list) return;
-  const items = posts.slice(0, MAX_POSTS);
-  buildList(items, list, FEEDS.posts.meta);
+  const feed = { ...FEEDS.posts, items: posts.slice(0, MAX_POSTS) };
+  buildList(feed, list);
 }
 
 function renderGamesList() {
   const list = document.querySelector("#games-list");
   if (!list) return;
-  buildList(FEEDS.games.items, list, FEEDS.games.meta);
+  buildList(FEEDS.games, list);
 }
 
 function renderAllPostsList() {
   const list = document.querySelector("#all-posts-list");
   if (!list) return;
-  buildList(posts, list, FEEDS.posts.meta);
+  buildList(FEEDS.posts, list);
+}
+
+function renderAllGamesList() {
+  const list = document.querySelector("#all-games-list");
+  if (!list) return;
+  buildList(FEEDS.games, list);
 }
 
 function renderFeatured(game) {
@@ -271,6 +283,14 @@ function setupNav() {
       ev.preventDefault();
       history.pushState({ section: "posts-all" }, "", "#posts-all");
       showSection("posts-all", false);
+    });
+  }
+  const gamesAll = document.querySelector("[data-action='view-all-games']");
+  if (gamesAll) {
+    gamesAll.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      history.pushState({ section: "games-all" }, "", "#games-all");
+      showSection("games-all", false);
     });
   }
   const backHome = document.querySelector("[data-action='back-home']");

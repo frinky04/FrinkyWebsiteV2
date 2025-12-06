@@ -36,15 +36,15 @@
             </p>
           </section>
 
-          <section class="section games">
-            <div class="section-head">
-              <h2>Games</h2>
-              <a href="#" class="view-all">view all</a>
-            </div>
-          <div class="catalogue-grid">
-            <div class="feature-card">
-              <div class="feature-header">LATEST</div>
-              <div class="feature-body">
+        <section class="section games">
+          <div class="section-head">
+            <h2>Games</h2>
+            <a href="#" class="view-all" data-action="view-all-games">view all</a>
+          </div>
+        <div class="catalogue-grid">
+          <div class="feature-card">
+            <div class="feature-header">LATEST</div>
+            <div class="feature-body">
                 <div class="feature-window">
                   <div class="scanlines"></div>
                   <div class="feature-overlay">
@@ -80,6 +80,14 @@
             <a href="#" class="view-all" data-action="back-home">back</a>
           </div>
           <ul class="list" id="all-posts-list" data-feed="posts"></ul>
+        </section>
+
+        <section class="page-section section games hidden" id="section-games-all">
+          <div class="section-head">
+            <h2>All Games</h2>
+            <a href="#" class="view-all" data-action="back-home">back</a>
+          </div>
+          <ul class="list" id="all-games-list" data-feed="games"></ul>
         </section>
 
         <section class="page-section section about hidden" id="section-about">
