@@ -30,7 +30,7 @@ window.CONTENT = {
     date: "05 Dec 2025",
     slug: "transience",
     href: "https://store.steampowered.com/app/2124100/Transience/",
-    image: "images/transience.png",
+    image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2124100/a2aa0043fdb796e58fc3eb17e47ac77d7dd1c1a8/ss_a2aa0043fdb796e58fc3eb17e47ac77d7dd1c1a8.1920x1080.jpg?t=1764875081",
     content: text`
     Become an Accountant - a hired mercenary who keeps the books balanced by any means necessary. This time though, you are the intended target. Take a journey through New Houston in the year 2056 and follow one man's tale of revenge as he escapes Transience.
     `,
@@ -132,30 +132,18 @@ window.CONTENT = {
   ],
   posts: [
     {
-      date: "06 Nov 2025",
-      title: "Sample entry about a new prototype release",
+      date: "07 Dec 2025",
+      title: "New Website",
       slug: "prototype-release",
       href: "#",
       content: text`
-        This is a longer note about the release. Keep adding lines without worrying about
-        indenting the text file; the helper above will tidy it.
+        Decided to make a new website. It's kinda a clone of some other one but I like it. Cool.
 
-        - Add bullet points
-        - Add links like https://example.com
-        - Keep paragraphs separated by blank lines
+        Transience is out now! Go check it out on Steam. Or don't, I don't mind.
       `,
     },
-    { date: "12 Oct 2025", title: "Placeholder post about a small tournament", slug: "tournament", href: "#" },
-    { date: "17 Sep 2025", title: "Example note on a 72 hour bundle", slug: "bundle-note", href: "#" },
-    { date: "21 Aug 2025", title: "Devlog: release recap and future plans", slug: "devlog-recap", href: "#" },
-    { date: "23 Jul 2025", title: "Launch announcement on PC", slug: "pc-launch", href: "#" },
-    { date: "20 Jul 2025", title: "Bug fix: navigation buttons not working", slug: "nav-bugfix", href: "#" },
-    { date: "15 Jul 2025", title: "Wishlist milestone and content tease", slug: "wishlist-tease", href: "#" },
-    { date: "01 Jul 2025", title: "Help page display issue resolved", slug: "help-display", href: "#" },
-    { date: "27 Jun 2025", title: "Join the official community server", slug: "community-server", href: "#" },
-    { date: "24 Jun 2025", title: "Wishlist reminder for upcoming project", slug: "wishlist-reminder", href: "#" },
   ],
   experience: [
-    { date: "2022 - Present", title: "Remote, Full-time, Programmer, Gameplay Designer", meta: "Transience, RESURGENT" },
+    { date: "2022 - Present", title: "Remote, Full-time, Programmer, Gameplay Designer", meta: "Transience @ RESURGENT" },
   ],
 };

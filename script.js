@@ -80,7 +80,9 @@ function buildList(feed, listEl) {
     link.textContent = item.title || item.text || "Untitled";
 
     meta.className = "meta";
-    meta.textContent = item.date
+    meta.textContent = type === "experience"
+      ? (typeof metaFn === "function" ? metaFn(item) : item.meta ?? "")
+      : item.date
       ? daysAgo(item.date)
       : typeof metaFn === "function"
       ? metaFn(item)

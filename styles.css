@@ -449,7 +449,7 @@ a:hover {
 
 .list li {
   display: grid;
-  grid-template-columns: 120px 1fr 70px;
+  grid-template-columns: 120px 1fr 240px;
   align-items: center;
   padding: 6px 0;
   border-bottom: 1px solid #111;
