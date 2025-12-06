@@ -1,11 +1,14 @@
 const content = window.CONTENT || {};
-const site = content.site || {};
 const games = content.games || [];
+const posts = content.posts || [];
 const featured = content.featured || games.find((g) => g.featured) || games[0];
+
+let currentSection = "home";
+let lastSection = "home";
 
 const FEEDS = {
   posts: {
-    items: content.posts || [],
+    items: posts,
     meta: (item) => item.meta ?? (item.date ? daysAgo(item.date) : ""),
   },
   experience: {
@@ -23,6 +26,31 @@ function daysAgo(dateString) {
   return `${days} days ago`;
 }
 
+function normalizeContent(raw) {
+  if (!raw) return "";
+  const lines = raw.split(/\r?\n/);
+  while (lines.length && lines[0].trim() === "") lines.shift();
+  while (lines.length && lines[lines.length - 1].trim() === "") lines.pop();
+  const indents = lines
+    .filter((l) => l.trim())
+    .map((l) => l.match(/^\s*/)[0].length);
+  const pad = indents.length ? Math.min(...indents) : 0;
+  return lines.map((l) => l.slice(pad)).join("\n");
+}
+
+function showSection(section) {
+  if (!section) return;
+  lastSection = currentSection;
+  currentSection = section;
+  document.querySelectorAll(".page-section").forEach((sec) => {
+    const id = sec.id.replace("section-", "");
+    sec.classList.toggle("hidden", id !== section);
+  });
+  document.querySelectorAll("[data-nav]").forEach((link) => {
+    link.classList.toggle("active", link.dataset.nav === section);
+  });
+}
+
 function buildList(items, listEl, metaFn) {
   if (!listEl || !items) return;
   listEl.innerHTML = "";
@@ -37,32 +65,28 @@ function buildList(items, listEl, metaFn) {
     date.textContent = item.date ? `[${item.date}]` : "";
 
     link.className = "link";
-    link.href = item.href || "#";
+    link.href = "#";
     link.textContent = item.title || item.text || "Untitled";
 
     meta.className = "meta";
     meta.textContent = typeof metaFn === "function" ? metaFn(item) : item.meta ?? "";
 
     const fullContent = normalizeContent(item.content);
-    if (fullContent) {
-      li.dataset.content = fullContent;
+    if (fullContent) li.dataset.content = fullContent;
+    if (item.slug) {
+      li.dataset.slug = item.slug;
+      li.dataset.type = "post";
+      li.style.cursor = "pointer";
+      link.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        openDetail("post", item.slug);
+      });
+      li.addEventListener("click", () => openDetail("post", item.slug));
     }
 
     li.append(date, link, meta);
     listEl.appendChild(li);
   });
-}
-
-function normalizeContent(raw) {
-  if (!raw) return "";
-  const lines = raw.split(/\r?\n/);
-  while (lines.length && lines[0].trim() === "") lines.shift();
-  while (lines.length && lines[lines.length - 1].trim() === "") lines.pop();
-  const indents = lines
-    .filter((l) => l.trim())
-    .map((l) => l.match(/^\s*/)[0].length);
-  const pad = indents.length ? Math.min(...indents) : 0;
-  return lines.map((l) => l.slice(pad)).join("\n");
 }
 
 function renderLists() {
@@ -72,25 +96,6 @@ function renderLists() {
     if (!feed) return;
     buildList(feed.items, list, feed.meta);
   });
-}
-
-function renderShell() {
-  if (site.title) {
-    const titleEl = document.querySelector(".title");
-    if (titleEl) titleEl.textContent = site.title;
-  }
-  if (site.year) {
-    const yearEl = document.querySelector(".year");
-    if (yearEl) yearEl.textContent = ``;
-  }
-  if (Array.isArray(site.nav)) {
-    const navEl = document.querySelector(".nav");
-    if (navEl) {
-      navEl.innerHTML = site.nav
-        .map((item) => `<a href="${item.href}">${item.label}</a>`)
-        .join("");
-    }
-  }
 }
 
 function renderFeatured(game) {
@@ -132,19 +137,11 @@ function renderGamesGrid(items) {
     cell.className = "item";
     cell.title = game.title || game.name || "Game";
 
-    if (game.href) {
-      cell.dataset.href = game.href;
-      cell.tabIndex = 0;
-      cell.setAttribute("role", "link");
-      cell.addEventListener("click", () => {
-        window.location.href = game.href;
-      });
-      cell.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter" || ev.key === " ") {
-          ev.preventDefault();
-          window.location.href = game.href;
-        }
-      });
+    if (game.slug) {
+      cell.dataset.slug = game.slug;
+      cell.dataset.type = "game";
+      cell.style.cursor = "pointer";
+      cell.addEventListener("click", () => openDetail("game", game.slug));
     }
 
     if (game.image) {
@@ -187,9 +184,88 @@ function tintIcons(scope) {
     });
 }
 
-document.addEventListener("layout:ready", () => {
-  renderShell();
+function openDetail(type, slug) {
+  const entry = findEntry(type, slug);
+  if (!entry) return;
+  lastSection = currentSection;
+  setDetail(entry);
+  showSection("detail");
+}
+
+function findEntry(type, slug) {
+  const collection = type === "game" ? games : posts;
+  return collection.find((item) => item.slug === slug);
+}
+
+function setDetail(entry) {
+  const titleEl = document.querySelector(".detail-title");
+  const metaEl = document.querySelector(".detail-meta");
+  const bodyEl = document.getElementById("detail-body");
+  const meta = entry.date || entry.meta || "";
+
+  if (titleEl) titleEl.textContent = entry.title || entry.name || "Untitled";
+  if (metaEl) metaEl.textContent = meta;
+  if (bodyEl) {
+    const normalized = normalizeContent(entry.content) || "More details coming soon.";
+    const parts = normalized.split(/\n{2,}/);
+    bodyEl.innerHTML = parts
+      .map((p) => {
+        if (p.trim().startsWith("-")) {
+          const items = p
+            .split(/\n/)
+            .map((line) => line.replace(/^\s*-\s?/, "").trim())
+            .filter(Boolean)
+            .map((li) => `<li>${li}</li>`)
+            .join("");
+          return `<ul>${items}</ul>`;
+        }
+        return `<p>${p.replace(/\n/g, "<br>")}</p>`;
+      })
+      .join("");
+  }
+  setDetailHero(entry.image);
+}
+
+function setDetailHero(image) {
+  const hero = document.querySelector(".detail-hero");
+  if (!hero) return;
+  if (image) {
+    hero.style.backgroundImage = `
+      linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.6)),
+      url('${image}')
+    `;
+    hero.style.backgroundSize = "cover, cover";
+    hero.style.backgroundPosition = "center, center";
+    hero.style.backgroundBlendMode = "overlay, normal";
+  } else {
+    hero.style.backgroundImage = "linear-gradient(180deg, #1a1a1a, #0a0a0a)";
+    hero.style.backgroundSize = "";
+    hero.style.backgroundPosition = "";
+    hero.style.backgroundBlendMode = "";
+  }
+}
+
+function setupNav() {
+  document.querySelectorAll("[data-nav]").forEach((link) => {
+    link.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      const target = link.dataset.nav;
+      showSection(target);
+    });
+  });
+
+  const back = document.querySelector(".detail-back");
+  if (back) {
+    back.addEventListener("click", () => {
+      showSection(lastSection || "home");
+    });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
   renderFeatured(featured);
   renderGamesGrid(games);
   renderLists();
+  setupNav();
+  showSection("home");
 });

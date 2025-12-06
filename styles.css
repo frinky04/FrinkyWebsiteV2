@@ -224,6 +224,10 @@ a:hover {
   color: var(--muted);
 }
 
+.hidden {
+  display: none !important;
+}
+
 .muted {
   color: var(--muted);
 }
@@ -232,6 +236,24 @@ a:hover {
 .detail {
   padding: 0;
   overflow: hidden;
+}
+
+.detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 0 8px;
+}
+
+.detail-back {
+  background: #1a1a1a;
+  color: #dcdcdc;
+  border: 1px solid #333;
+  border-radius: 2px;
+  padding: 6px 10px;
+  font-size: 11px;
+  cursor: pointer;
 }
 
 .detail-hero {

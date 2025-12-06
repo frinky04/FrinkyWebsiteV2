@@ -6,58 +6,115 @@
   <title>Finn Rawlings | Clone</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="content.js" defer></script>
-  <script src="layout.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
-  <div id="app"></div>
-
-  <template id="page-content">
-    <section class="intro" id="home">
-      <p>
-        Welcome to my site! I make experimental projects and share them on the internet, all of which you can
-        find here. Most of them involve detailed machinery, atmospheric environments,
-        suspense, and other fun stuff like that.
-      </p>
-      <p>
-        Feel free to pick something from the catalogue, and have fun!
-      </p>
-    </section>
-
-    <section class="section games">
-      <div class="section-head">
-        <h2>Games</h2>
-        <a href="#" class="view-all">view all</a>
-      </div>
-      <div class="catalogue-grid">
-        <div class="feature-card">
-          <div class="feature-header">LATEST</div>
-          <div class="feature-window">
-            <div class="scanlines"></div>
-            <div class="feature-overlay">
-              <div class="feature-title" data-slot="feature-title">example project</div>
-            </div>
+  <div class="page">
+    <div class="frame">
+      <div class="inner" id="top">
+        <header class="top">
+          <div>
+            <div class="title">Finn Rawlings (Frinky)</div>
           </div>
-        </div>
-        <div class="item-grid" aria-label="catalogue items" id="games-grid"></div>
-      </div>
-    </section>
+        </header>
 
-    <section class="section posts">
-      <div class="section-head">
-        <h2>Posts</h2>
-        <a href="#" class="view-all">view all</a>
-      </div>
-      <ul class="list" id="registry-list" data-feed="posts"></ul>
-    </section>
+        <section class="nav-box">
+          <div class="nav">
+            <a href="#" data-nav="home">homepage</a><a href="#" data-nav="contact">contact</a><a href="#" data-nav="about">about</a>
+          </div>
+        </section>
 
-    <section class="section experience">
-      <div class="section-head">
-        <h2>Experience</h2>
-        <span class="view-all muted">selected roles</span>
+        <section class="page-section" id="section-home">
+          <section class="intro" id="home">
+            <p>
+              Welcome to my site! I make experimental projects and share them on the internet, all of which you can
+              find here. Most of them involve detailed machinery, atmospheric environments,
+              suspense, and other fun stuff like that.
+            </p>
+            <p>
+              Feel free to pick something from the catalogue, and have fun!
+            </p>
+          </section>
+
+          <section class="section games">
+            <div class="section-head">
+              <h2>Games</h2>
+              <a href="#" class="view-all">view all</a>
+            </div>
+            <div class="catalogue-grid">
+              <div class="feature-card">
+                <div class="feature-header">LATEST</div>
+                <div class="feature-window">
+                  <div class="scanlines"></div>
+                  <div class="feature-overlay">
+                    <div class="feature-title" data-slot="feature-title">example project</div>
+                  </div>
+                </div>
+              </div>
+              <div class="item-grid" aria-label="catalogue items" id="games-grid"></div>
+            </div>
+          </section>
+
+          <section class="section posts">
+            <div class="section-head">
+              <h2>Posts</h2>
+              <a href="#" class="view-all">view all</a>
+            </div>
+            <ul class="list" id="registry-list" data-feed="posts"></ul>
+          </section>
+
+          <section class="section experience">
+            <div class="section-head">
+              <h2>Experience</h2>
+              <span class="view-all muted">selected roles</span>
+            </div>
+            <ul class="list" id="experience-list" data-feed="experience"></ul>
+          </section>
+        </section>
+
+        <section class="page-section section about hidden" id="section-about">
+          <div class="section-head">
+            <h2>About</h2>
+            <span class="view-all muted">edit this copy</span>
+          </div>
+          <p class="body-text">
+            Use this space to introduce yourself, your craft, and your favorite tools. Add a short origin story, your current focus, and what kinds of collaborations you’re open to.
+          </p>
+          <p class="body-text" style="margin-top:8px;">
+            You can also drop links to portfolios, talks, or social profiles here.
+          </p>
+        </section>
+
+        <section class="page-section section contact hidden" id="section-contact">
+          <div class="section-head">
+            <h2>Contact</h2>
+            <span class="view-all muted">ways to reach out</span>
+          </div>
+          <p class="body-text">
+            List your preferred channels: email, social handles, booking form, or calendar links.
+          </p>
+          <p class="body-text" style="margin-top:8px;">
+            You can also add availability notes, collaboration guidelines, or a short pitch for what you’re looking for.
+          </p>
+        </section>
+
+        <section class="page-section section detail hidden" id="section-detail">
+          <div class="section-head detail-head">
+            <h2 class="detail-title">Entry Title</h2>
+            <button class="detail-back" type="button" data-nav="home">← back</button>
+          </div>
+          <div class="detail-hero">
+            <div class="detail-overlay">
+              <div class="detail-meta"></div>
+            </div>
+            <div class="scanlines"></div>
+          </div>
+          <div class="detail-body" id="detail-body">
+            Loading...
+          </div>
+        </section>
       </div>
-      <ul class="list" id="experience-list" data-feed="experience"></ul>
-    </section>
-  </template>
+    </div>
+  </div>
 </body>
 </html>
