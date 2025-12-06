@@ -236,6 +236,7 @@ a:hover {
 .detail {
   padding: 0;
   overflow: hidden;
+  margin-bottom: 0;
 }
 
 .detail-head {
@@ -243,7 +244,7 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 4px 8px 10px;
+  padding: 12px 14px 8px;
   margin: 0;
 }
 
@@ -265,11 +266,11 @@ a:hover {
 }
 
 .detail-title {
-  font-size: 18px;
-  letter-spacing: 1px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
   margin: 0;
-  padding-left: 2px;
-  padding-top: 5px;
+  padding-left: 0;
+  padding-top: 0;
 }
 
 .detail-meta {
@@ -279,9 +280,10 @@ a:hover {
 }
 
 .detail-body {
-  padding: 14px 14px 18px;
+  padding: 12px 14px 14px;
   background: #111;
   color: #d8d8d8;
+  font-size: 12px;
   line-height: 1.5;
 }
 

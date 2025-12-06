@@ -32,25 +32,50 @@ window.CONTENT = {
     href: "https://store.steampowered.com/app/2124100/Transience/",
     image: "images/transience.png",
     content: text`
-      A short teaser for the featured project. Drop a few sentences here
-      about what makes it interesting and why someone should click in.
+    Become an Accountant - a hired mercenary who keeps the books balanced by any means necessary. This time though, you are the intended target. Take a journey through New Houston in the year 2056 and follow one man's tale of revenge as he escapes Transience.
     `,
   },
   games: [
     {
-      title: "example project",
-      date: "14 Oct 2025",
-      slug: "example-project",
+      title: "screen wrap.",
+      date: "02 Aug 2025",
+      slug: "screen-wrap",
       href: "#",
       image: "images/screen_wrap.png",
       content: text`
-        Quick blurb about this game. Mention mechanics, mood, and where to play.
+      a short, top down, atmospheric puzzle game about boundary warp, screen wrap, whatever you want to call it. 
+
+      built by frinky & daniel in 4 days for the GMTK game jam. 
+
+
+      - puzzles
+      - 3 levels
+      - light stealth
+      - inventory system 
+      - spooks 👻
+      
+      https://frinkyyy.itch.io/screenwrap
       `,
     },
-    { title: "Project Echo", date: "02 Sep 2025", slug: "project-echo", href: "#", image: "", content: "Quick blurb for Project Echo." },
-    { title: "Signal Black", date: "18 Aug 2025", slug: "signal-black", href: "#", image: "", content: "Quick blurb for Signal Black." },
-    { title: "Rogue Lattice", date: "01 Aug 2025", slug: "rogue-lattice", href: "#", image: "", content: "Quick blurb for Rogue Lattice." },
-    { title: "Delta Switch", date: "17 Jul 2025", slug: "delta-switch", href: "#", image: "", content: "Quick blurb for Delta Switch." },
+    {
+      title: "infinite golf",
+      date: "02 Aug 2025",
+      slug: "infinite-golf",
+      href: "#",
+      image: "images/infinite_golf.png",
+      content: text`
+      I decided to give Godot a try, and this game is the result.
+
+
+      - A zen-like golf experience where you can relax whilst hitting the ball into the hole.
+      - Infinite (4,294,967,295) (with a few duplicates) levels
+      - Discord Rich Presence integration.
+      - Original music and art
+      - Lightweight and simple
+
+      https://frinkyyy.itch.io/infinite-golf
+      `,
+    },
   ],
   posts: [
     {
