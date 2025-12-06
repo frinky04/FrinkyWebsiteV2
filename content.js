@@ -19,7 +19,6 @@ const text = (strings, ...values) => {
 window.CONTENT = {
   site: {
     title: "Finn Rawlings (Frinky)",
-    year: "2025",
     nav: [
       { label: "homepage", section: "home" },
       { label: "contact", section: "contact" },
@@ -27,11 +26,11 @@ window.CONTENT = {
     ],
   },
   featured: {
-    title: "example project",
-    date: "14 Oct 2025",
-    slug: "example-project",
-    href: "#",
-    image: "1.png",
+    title: "Transience",
+    date: "05 Dec 2025",
+    slug: "transience",
+    href: "https://store.steampowered.com/app/2124100/Transience/",
+    image: "images/transience.png",
     content: text`
       A short teaser for the featured project. Drop a few sentences here
       about what makes it interesting and why someone should click in.

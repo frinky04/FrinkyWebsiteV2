@@ -4,6 +4,8 @@ const posts = content.posts || [];
 const featured = content.featured || games.find((g) => g.featured) || games[0];
 
 let currentSection = "home";
+let showAllPosts = false;
+const MAX_POSTS = 8;
 
 const FEEDS = {
   posts: {
@@ -77,12 +79,10 @@ function buildList(items, listEl, metaFn) {
     if (item.slug) {
       li.dataset.slug = item.slug;
       li.dataset.type = "post";
-      li.style.cursor = "pointer";
       link.addEventListener("click", (ev) => {
         ev.preventDefault();
         openDetail("post", item.slug);
       });
-      li.addEventListener("click", () => openDetail("post", item.slug));
     }
 
     li.append(date, link, meta);
@@ -91,12 +91,22 @@ function buildList(items, listEl, metaFn) {
 }
 
 function renderLists() {
-  document.querySelectorAll("[data-feed]").forEach((list) => {
-    const key = list.dataset.feed;
-    const feed = FEEDS[key];
-    if (!feed) return;
-    buildList(feed.items, list, feed.meta);
-  });
+  renderPostsList();
+  const expList = document.querySelector("#experience-list");
+  buildList(FEEDS.experience.items, expList, FEEDS.experience.meta);
+}
+
+function renderPostsList() {
+  const list = document.querySelector("#registry-list");
+  if (!list) return;
+  const items = showAllPosts ? posts : posts.slice(0, MAX_POSTS);
+  buildList(items, list, FEEDS.posts.meta);
+
+  const toggle = document.querySelector("[data-view='posts']");
+  if (toggle) {
+    toggle.textContent = showAllPosts ? "view recent" : "view all";
+    toggle.style.display = posts.length > MAX_POSTS ? "inline" : "none";
+  }
 }
 
 function renderFeatured(game) {
@@ -189,8 +199,13 @@ function openDetail(type, slug) {
   const entry = findEntry(type, slug);
   if (!entry) return;
   setDetail(entry);
+  const state = { section: "detail", type, slug };
+  if (history.state?.section === "detail" && history.state.slug === slug && history.state.type === type) {
+    showSection("detail", false);
+    return;
+  }
+  history.pushState(state, "", "#detail");
   showSection("detail", false);
-  history.pushState({ section: "detail", type, slug }, "", "#detail");
 }
 
 function findEntry(type, slug) {
@@ -252,9 +267,20 @@ function setupNav() {
       ev.preventDefault();
       const target = link.dataset.nav;
       if (!target) return;
-      showSection(target, true);
+      const state = { section: target };
+      history.pushState(state, "", `#${target}`);
+      showSection(target, false);
     });
   });
+
+  const postsToggle = document.querySelector("[data-view='posts']");
+  if (postsToggle) {
+    postsToggle.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      showAllPosts = !showAllPosts;
+      renderPostsList();
+    });
+  }
 }
 
 window.addEventListener("popstate", (event) => {
