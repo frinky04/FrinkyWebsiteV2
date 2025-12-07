@@ -117,7 +117,7 @@ window.CONTENT = {
     {
       date: "07 Dec 2025",
       title: "New website",
-      slug: "prototype-release",
+      slug: "website-release",
       href: "#",
       content: text`
         Decided to make a new website.

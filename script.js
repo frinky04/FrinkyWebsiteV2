@@ -33,6 +33,54 @@ function daysAgo(dateString) {
   return `${days} days ago`;
 }
 
+function parseHash(hash) {
+  const clean = (hash || "").replace(/^#/, "");
+  if (!clean) return { section: "home" };
+  if (clean.startsWith("detail-")) {
+    const parts = clean.split("-");
+    const type = parts[1];
+    const slug = parts.slice(2).join("-");
+    if (type && slug) return { section: "detail", type, slug };
+  }
+  return { section: clean };
+}
+
+function routeToHash(route) {
+  if (route.section === "detail" && route.type && route.slug) {
+    return `#detail-${route.type}-${route.slug}`;
+  }
+  const section = route.section || "home";
+  return `#${section}`;
+}
+
+function navigateRoute(route, pushHistory = false) {
+  if (route.section === "detail" && route.type && route.slug) {
+    const entry = findEntry(route.type, route.slug);
+    if (!entry) {
+      navigateRoute({ section: "home" }, pushHistory);
+      return;
+    }
+    setDetail(entry);
+    if (pushHistory) {
+      history.pushState(route, "", routeToHash(route));
+    }
+    showSection("detail", false);
+    return;
+  }
+  if (route.section === "detail") {
+    navigateRoute({ section: "home" }, pushHistory);
+    return;
+  }
+  let section = route.section || "home";
+  if (!document.getElementById(`section-${section}`)) {
+    section = "home";
+  }
+  if (pushHistory) {
+    history.pushState({ section }, "", `#${section}`);
+  }
+  showSection(section, false);
+}
+
 function normalizeContent(raw) {
   if (!raw) return "";
   const lines = raw.split(/\r?\n/);
@@ -213,7 +261,7 @@ function openDetail(type, slug) {
     showSection("detail", false);
     return;
   }
-  history.pushState(state, "", "#detail");
+  history.pushState(state, "", routeToHash(state));
   showSection("detail", false);
 }
 
@@ -223,9 +271,10 @@ function findEntry(type, slug) {
 }
 
 function setDetail(entry) {
-  const titleEl = document.querySelector(".detail-title");
-  const metaEl = document.querySelector(".detail-meta");
-  const bodyEl = document.getElementById("detail-body");
+  const detailSection = document.getElementById("section-detail");
+  const titleEl = detailSection?.querySelector(".detail-title");
+  const metaEl = detailSection?.querySelector(".detail-meta");
+  const bodyEl = detailSection?.querySelector("#detail-body");
   const meta = entry.date || entry.meta || "";
 
   if (titleEl) titleEl.textContent = entry.title || entry.name || "Untitled";
@@ -258,7 +307,7 @@ function setDetail(entry) {
 }
 
 function setDetailHero(image) {
-  const hero = document.querySelector(".detail-hero");
+  const hero = document.querySelector("#section-detail .detail-hero");
   if (!hero) return;
   if (image) {
     hero.style.backgroundImage = `
@@ -303,34 +352,34 @@ function setupNav() {
       showSection("games-all", false);
     });
   }
-  const backHome = document.querySelector("[data-action='back-home']");
-  if (backHome) {
+  document.querySelectorAll("[data-action='back-home']").forEach((backHome) => {
     backHome.addEventListener("click", (ev) => {
       ev.preventDefault();
       history.pushState({ section: "home" }, "", "#home");
       showSection("home", false);
     });
-  }
+  });
 }
 
 window.addEventListener("popstate", (event) => {
   const state = event.state;
-  if (state?.section === "detail" && state.type && state.slug) {
-    const entry = findEntry(state.type, state.slug);
-    if (entry) {
-      setDetail(entry);
-      showSection("detail", false);
-      return;
-    }
+  if (state) {
+    navigateRoute(state, false);
+    return;
   }
-  const section = state?.section || "home";
-  showSection(section, false);
+  const route = parseHash(window.location.hash);
+  navigateRoute(route, false);
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  history.replaceState({ section: "home" }, "", "#home");
+  const initialRoute = parseHash(window.location.hash);
+  const hasDetail = initialRoute.section === "detail" && initialRoute.type && initialRoute.slug;
+  const detailEntry = hasDetail ? findEntry(initialRoute.type, initialRoute.slug) : null;
+  const route = hasDetail && !detailEntry ? { section: "home" } : initialRoute;
+
+  history.replaceState(route, "", routeToHash(route));
   renderFeatured(featured);
   renderLists();
   setupNav();
-  showSection("home", false);
+  navigateRoute(route, false);
 });
