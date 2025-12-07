@@ -20,7 +20,7 @@ window.CONTENT = {
   site: {
     title: "Finn Rawlings (Frinky)",
     nav: [
-      { label: "homepage", section: "home" },
+      { label: "home", section: "home" },
       { label: "contact", section: "contact" },
       { label: "about", section: "about" },
     ],
@@ -51,7 +51,7 @@ window.CONTENT = {
       date: "05 Dec 2025",
       slug: "transience",
       href: "#",
-      image: "images/transience.webp",
+      image: "images/transience_screenshot.webp",
       downloadUrl: "https://store.steampowered.com/app/2124100/Transience/",
       content: text`
       Become an Accountant - a hired mercenary who keeps the books balanced by any means necessary. This time though, you are the intended target. Take a journey through New Houston in the year 2056 and follow one man's tale of revenge as he escapes Transience.
@@ -87,14 +87,7 @@ window.CONTENT = {
       image: "images/infinite_golf.webp",
       downloadUrl: "https://frinkyyy.itch.io/infinite-golf",
       content: text`
-      I decided to give Godot a try, and this game is the result.
-
-
-      - A zen-like golf experience where you can relax whilst hitting the ball into the hole.
-      - Infinite (4,294,967,295) (with a few duplicates) levels
-      - Discord Rich Presence integration.
-      - Original music and art
-      - Lightweight and simple
+      A zen-like golf experience where you can relax whilst hitting the ball into the hole. Made with Godot.
       `,
     },
     {
