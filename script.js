@@ -78,6 +78,18 @@ function daysAgo(dateString) {
   return `${days} days ago`;
 }
 
+function yearsAgo(dateString) {
+  const target = dateString ? new Date(dateString) : null;
+  if (!target || Number.isNaN(target.getTime())) return null;
+  const now = new Date();
+  let years = now.getFullYear() - target.getFullYear();
+  const hasHadBirthday =
+    now.getMonth() > target.getMonth() ||
+    (now.getMonth() === target.getMonth() && now.getDate() >= target.getDate());
+  if (!hasHadBirthday) years -= 1;
+  return Math.max(years, 0);
+}
+
 function parseHash(hash) {
   const clean = (hash || "").replace(/^#/, "");
   if (!clean) return { section: "home" };
@@ -229,6 +241,15 @@ function renderAllGamesList() {
   const list = document.querySelector("#all-games-list");
   if (!list) return;
   buildList(FEEDS.games, list);
+}
+
+function renderAboutAge() {
+  const metaEl = document.querySelector("#about-age");
+  if (!metaEl) return;
+  const birthDate = "24 Sep 2004";
+  const age = yearsAgo(birthDate);
+  const suffix = typeof age === "number" && age >= 0 ? ` (${age} years ago)` : "";
+  metaEl.textContent = `Born ${birthDate}${suffix}`;
 }
 
 function renderFeatured(game) {
@@ -482,6 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
   history.replaceState(route, "", routeToHash(route));
   renderFeatured(featured);
   renderLists();
+  renderAboutAge();
   setupNav();
   navigateRoute(route, false);
 });
