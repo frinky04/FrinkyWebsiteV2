@@ -18,6 +18,39 @@ function preloadImage(src, id) {
   document.head.appendChild(link);
 }
 
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    if (!src) {
+      resolve();
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      if (img.decode) {
+        img
+          .decode()
+          .then(() => resolve(src))
+          .catch(() => resolve(src));
+        return;
+      }
+      resolve(src);
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+function ensureLoader(el) {
+  if (!el) return null;
+  let loader = el.querySelector(".loading-spinner");
+  if (!loader) {
+    loader = document.createElement("div");
+    loader.className = "loading-spinner";
+    el.appendChild(loader);
+  }
+  return loader;
+}
+
 const FEEDS = {
   posts: {
     items: posts,
@@ -250,20 +283,48 @@ function renderFeatured(game) {
 function setFeatureBackground(image) {
   const win = document.querySelector(".feature-window");
   if (!win) return;
-  if (image) {
-    win.style.backgroundImage = `
-      url('${image}'),
-      linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.75) 100%)
-    `;
-    win.style.backgroundSize = "cover, cover";
-    win.style.backgroundPosition = "center, center";
-    win.style.backgroundBlendMode = "normal, overlay";
-  } else {
-    win.style.backgroundImage = "";
-    win.style.backgroundSize = "";
-    win.style.backgroundPosition = "";
-    win.style.backgroundBlendMode = "";
+  ensureLoader(win);
+  const token = Symbol("feature-bg");
+  win._bgToken = token;
+  const placeholder = "linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.75) 100%)";
+
+  if (!image) {
+    win.classList.remove("loading");
+    win.style.backgroundImage = placeholder;
+    win.style.backgroundSize = "cover";
+    win.style.backgroundPosition = "center";
+    win.style.backgroundBlendMode = "normal";
+    return;
   }
+  win.classList.add("loading");
+  win.style.backgroundImage = placeholder;
+  win.style.backgroundSize = "cover";
+  win.style.backgroundPosition = "center";
+  win.style.backgroundBlendMode = "normal";
+
+  loadImage(image)
+    .then(() => {
+      if (win._bgToken !== token) return;
+      win.style.backgroundImage = `
+        url('${image}'),
+        ${placeholder}
+      `;
+      win.style.backgroundSize = "cover, cover";
+      win.style.backgroundPosition = "center, center";
+      win.style.backgroundBlendMode = "normal, overlay";
+    })
+    .catch(() => {
+      if (win._bgToken !== token) return;
+      win.style.backgroundImage = placeholder;
+      win.style.backgroundSize = "cover";
+      win.style.backgroundPosition = "center";
+      win.style.backgroundBlendMode = "normal";
+    })
+    .finally(() => {
+      if (win._bgToken === token) {
+        win.classList.remove("loading");
+      }
+    });
 }
 
 function openDetail(type, slug) {
@@ -323,21 +384,47 @@ function setDetail(entry) {
 function setDetailHero(image) {
   const hero = document.querySelector("#section-detail .detail-hero");
   if (!hero) return;
-  if (image) {
-    preloadImage(image, "preload-detail-image");
-    hero.style.backgroundImage = `
-      linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.6)),
-      url('${image}')
-    `;
-    hero.style.backgroundSize = "cover, cover";
-    hero.style.backgroundPosition = "center, center";
-    hero.style.backgroundBlendMode = "overlay, normal";
-  } else {
-    hero.style.backgroundImage = "linear-gradient(180deg, #1a1a1a, #0a0a0a)";
-    hero.style.backgroundSize = "";
-    hero.style.backgroundPosition = "";
-    hero.style.backgroundBlendMode = "";
+  ensureLoader(hero);
+  const token = Symbol("detail-bg");
+  hero._bgToken = token;
+  const placeholder = "linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.6))";
+  if (!image) {
+    hero.classList.remove("loading");
+    hero.style.backgroundImage = placeholder;
+    hero.style.backgroundSize = "cover";
+    hero.style.backgroundPosition = "center";
+    hero.style.backgroundBlendMode = "overlay";
+    return;
   }
+  hero.classList.add("loading");
+  hero.style.backgroundImage = placeholder;
+  hero.style.backgroundSize = "cover";
+  hero.style.backgroundPosition = "center";
+  hero.style.backgroundBlendMode = "overlay";
+  preloadImage(image, "preload-detail-image");
+  loadImage(image)
+    .then(() => {
+      if (hero._bgToken !== token) return;
+      hero.style.backgroundImage = `
+        url('${image}'),
+        ${placeholder}
+      `;
+      hero.style.backgroundSize = "cover, cover";
+      hero.style.backgroundPosition = "center, center";
+      hero.style.backgroundBlendMode = "overlay, normal";
+    })
+    .catch(() => {
+      if (hero._bgToken !== token) return;
+      hero.style.backgroundImage = placeholder;
+      hero.style.backgroundSize = "cover";
+      hero.style.backgroundPosition = "center";
+      hero.style.backgroundBlendMode = "overlay";
+    })
+    .finally(() => {
+      if (hero._bgToken === token) {
+        hero.classList.remove("loading");
+      }
+    });
 }
 
 function setupNav() {

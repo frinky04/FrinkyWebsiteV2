@@ -424,6 +424,41 @@ a:hover {
   opacity: 0.4;
 }
 
+@keyframes loader-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.loading-spinner {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.55));
+  z-index: 4;
+  pointer-events: none;
+}
+
+.loading .loading-spinner {
+  display: flex;
+}
+
+.loading-spinner::after {
+  content: "";
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-top-color: var(--accent);
+  border-bottom-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.65), inset 0 0 8px rgba(255, 255, 255, 0.06);
+  animation: loader-spin 0.9s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .scanlines {
     display: none;
@@ -431,6 +466,9 @@ a:hover {
   .feature-window::before,
   .feature-window::after {
     display: none;
+  }
+  .loading-spinner::after {
+    animation: none;
   }
 }
 
