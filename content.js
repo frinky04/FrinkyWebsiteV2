@@ -29,7 +29,7 @@ window.CONTENT = {
     title: "Transience",
     date: "05 Dec 2025",
     slug: "transience",
-    image: "images/transience_screenshot.jpg",
+    image: "images/transience_screenshot.webp",
     content: text`
     Become an Accountant - a hired mercenary who keeps the books balanced by any means necessary. This time though, you are the intended target. Take a journey through New Houston in the year 2056 and follow one man's tale of revenge as he escapes Transience.
     `,
@@ -40,7 +40,7 @@ window.CONTENT = {
       date: "Coming Soon",
       slug: "bang-shoot",
       href: "#",
-      image: "images/bang-shoot.jpg",
+      image: "images/bang-shoot.webp",
       downloadUrl: "https://store.steampowered.com/app/3264590/bang_shoot/",
       content: text`
       A fast-paced arena shooter where you wield two weapons at once across unique battlegrounds. Each round is different—new map, teams, weapons, and modifiers.
@@ -51,7 +51,7 @@ window.CONTENT = {
       date: "05 Dec 2025",
       slug: "transience",
       href: "#",
-      image: "images/transience.png",
+      image: "images/transience.webp",
       downloadUrl: "https://store.steampowered.com/app/2124100/Transience/",
       content: text`
       Become an Accountant - a hired mercenary who keeps the books balanced by any means necessary. This time though, you are the intended target. Take a journey through New Houston in the year 2056 and follow one man's tale of revenge as he escapes Transience.
@@ -62,19 +62,10 @@ window.CONTENT = {
       date: "02 Aug 2025",
       slug: "screen-wrap",
       href: "#",
-      image: "images/screen_wrap.png",
+      image: "images/screen_wrap.webp",
       downloadUrl: "https://frinkyyy.itch.io/screenwrap",
       content: text`
-      a short, top down, atmospheric puzzle game about boundary warp, screen wrap, whatever you want to call it.
-
-      built by frinky & daniel in 4 days for the GMTK game jam.
-
-
-      - puzzles
-      - 3 levels
-      - light stealth
-      - inventory system
-      - spooks 👻
+      A short, top down, atmospheric puzzle game about boundary warp, screen wrap, whatever you want to call it. Built by frinky & daniel in 4 days for the GMTK game jam.
       `,
     },
     {
@@ -82,7 +73,7 @@ window.CONTENT = {
       date: "03 April 2024",
       slug: "dishwashing-simulator",
       href: "#",
-      image: "images/dishwashing-simulator.jpg",
+      image: "images/dishwashing-simulator.webp",
       downloadUrl: "https://store.steampowered.com/app/2747780/Dishwashing_Simulator/",
       content: text`
       A short, unique survival-farming-base-building-tycoon-horror game where you must survive through washing dishes. Explore mysterious depths, manage resources, and unravel a cryptic narrative. In DWS, a chore becomes a journey to freedom.
@@ -93,7 +84,7 @@ window.CONTENT = {
       date: "07 Feb 2024",
       slug: "infinite-golf",
       href: "#",
-      image: "images/infinite_golf.png",
+      image: "images/infinite_golf.webp",
       downloadUrl: "https://frinkyyy.itch.io/infinite-golf",
       content: text`
       I decided to give Godot a try, and this game is the result.
@@ -111,7 +102,7 @@ window.CONTENT = {
       date: "08 Oct 2021",
       slug: "ground-unbound",
       href: "#",
-      image: "images/ground-unbound.jpg",
+      image: "images/ground-unbound.webp",
       downloadUrl: "https://store.steampowered.com/app/1760020/GROUNDUNBOUND/",
       content: text`
       GROUND-UNBOUND is a procedurally generated, high-intensity movement shooter with a retro wave art style. It features roguelike mechanics with a number of skills, guns and abilities to play with, including a variety of enemy types. Created during the 7-Day BigFry Game Jam, updated for steam release.
@@ -122,7 +113,7 @@ window.CONTENT = {
       date: "28 April 2020",
       slug: "chaos",
       href: "#",
-      image: "images/chaos.jpg",
+      image: "images/chaos.webp",
       downloadUrl: "https://store.steampowered.com/app/1230410/Chaos/",
       content: text`
       Chaos is an online FPS game. Why should you play it? Destruction, lots of it, plus some explosions, oh yeah, guns! Who doesn't like guns and explosions?
@@ -136,9 +127,7 @@ window.CONTENT = {
       slug: "prototype-release",
       href: "#",
       content: text`
-        Decided to make a new website. It's kinda a clone of some other one but I like it. Cool.
-
-        Transience is out now! Go check it out on Steam. Or don't, I don't mind.
+        Decided to make a new website.
       `,
     },
     {
