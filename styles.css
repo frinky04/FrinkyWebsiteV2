@@ -424,6 +424,16 @@ a:hover {
   opacity: 0.4;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .scanlines {
+    display: none;
+  }
+  .feature-window::before,
+  .feature-window::after {
+    display: none;
+  }
+}
+
 .feature-overlay {
   position: absolute;
   inset: 0;

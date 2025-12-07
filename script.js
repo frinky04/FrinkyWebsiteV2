@@ -6,6 +6,18 @@ const featured = content.featured || games.find((g) => g.featured) || games[0];
 let currentSection = "home";
 const MAX_POSTS = 8;
 
+function preloadImage(src, id) {
+  if (!src) return;
+  const existing = id ? document.getElementById(id) : null;
+  if (existing && existing.href === src) return;
+  const link = existing || document.createElement("link");
+  link.rel = "preload";
+  link.as = "image";
+  if (id) link.id = id;
+  link.href = src;
+  document.head.appendChild(link);
+}
+
 const FEEDS = {
   posts: {
     items: posts,
@@ -193,7 +205,9 @@ function renderFeatured(game) {
   const blurbEl = document.querySelector("#feature-blurb");
   if (titleEl) titleEl.textContent = "";
   const fallbackImage = findEntry("game", game.slug || "")?.image || games.find((g) => g.image)?.image;
-  setFeatureBackground(game.image || fallbackImage);
+  const heroImage = game.image || fallbackImage;
+  preloadImage(heroImage, "preload-feature-image");
+  setFeatureBackground(heroImage);
   if (blurbEl) {
     const title = game.title || game.name || "Untitled";
     const datePart = game.date ? `${game.date}` : "";
@@ -310,6 +324,7 @@ function setDetailHero(image) {
   const hero = document.querySelector("#section-detail .detail-hero");
   if (!hero) return;
   if (image) {
+    preloadImage(image, "preload-detail-image");
     hero.style.backgroundImage = `
       linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.6)),
       url('${image}')
