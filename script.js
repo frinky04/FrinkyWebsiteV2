@@ -150,6 +150,179 @@ function normalizeContent(raw) {
   return lines.map((l) => l.slice(pad)).join("\n");
 }
 
+function escapeHTML(str) {
+  return (str || "").replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case '"':
+        return "&quot;";
+      case "'":
+        return "&#39;";
+      default:
+        return char;
+    }
+  });
+}
+
+function sanitizeUrl(url) {
+  const value = (url || "").trim();
+  if (!value) return "";
+  const lower = value.toLowerCase();
+  if (lower.startsWith("javascript:") || lower.startsWith("vbscript:") || lower.startsWith("data:text/html")) {
+    return "";
+  }
+  return value;
+}
+
+function inlineMarkdown(text) {
+  if (!text) return "";
+  const placeholders = [];
+  const addPlaceholder = (html) => {
+    const key = `__MD_${placeholders.length}__`;
+    placeholders.push({ key, html });
+    return key;
+  };
+
+  let working = text;
+
+  working = working.replace(/`([^`]+)`/g, (_, code) => {
+    return addPlaceholder(`<code>${escapeHTML(code)}</code>`);
+  });
+
+  working = working.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
+    const safeSrc = sanitizeUrl(src);
+    const safeAlt = escapeHTML(alt);
+    if (!safeSrc) return safeAlt;
+    return addPlaceholder(`<img src="${escapeHTML(safeSrc)}" alt="${safeAlt}" loading="lazy">`);
+  });
+
+  working = working.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => {
+    const safeHref = sanitizeUrl(href);
+    const safeLabel = escapeHTML(label);
+    if (!safeHref) return safeLabel;
+    return addPlaceholder(
+      `<a href="${escapeHTML(safeHref)}" target="_blank" rel="noopener noreferrer">${safeLabel}</a>`
+    );
+  });
+
+  working = working.replace(/\*\*([^*]+)\*\*/g, (_, boldText) => {
+    return addPlaceholder(`<strong>${escapeHTML(boldText)}</strong>`);
+  });
+
+  working = working.replace(/\*([^*]+)\*/g, (_, italicText) => {
+    return addPlaceholder(`<em>${escapeHTML(italicText)}</em>`);
+  });
+
+  let escaped = escapeHTML(working);
+  placeholders.forEach(({ key, html }) => {
+    escaped = escaped.replace(key, html);
+  });
+  return escaped;
+}
+
+function renderMarkdown(raw) {
+  const text = normalizeContent(raw);
+  if (!text) return "";
+
+  const lines = text.split(/\r?\n/);
+  const html = [];
+  let list = null;
+  let paragraph = [];
+  let inCodeBlock = false;
+  let codeBuffer = [];
+
+  const flushParagraph = () => {
+    if (!paragraph.length) return;
+    html.push(`<p>${inlineMarkdown(paragraph.join(" "))}</p>`);
+    paragraph = [];
+  };
+
+  const flushList = () => {
+    if (!list) return;
+    const items = list.items.map((item) => `<li>${inlineMarkdown(item)}</li>`).join("");
+    html.push(`<${list.type}>${items}</${list.type}>`);
+    list = null;
+  };
+
+  const flushCode = () => {
+    if (!inCodeBlock) return;
+    html.push(`<pre><code>${escapeHTML(codeBuffer.join("\n"))}</code></pre>`);
+    codeBuffer = [];
+    inCodeBlock = false;
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (inCodeBlock) {
+      if (trimmed.startsWith("```")) {
+        flushCode();
+        continue;
+      }
+      codeBuffer.push(line.replace(/^\s{0,4}/, ""));
+      continue;
+    }
+
+    if (trimmed.startsWith("```")) {
+      flushParagraph();
+      flushList();
+      inCodeBlock = true;
+      codeBuffer = [];
+      continue;
+    }
+
+    if (trimmed === "") {
+      flushParagraph();
+      flushList();
+      continue;
+    }
+
+    const headingMatch = trimmed.match(/^(#{1,3})\s+(.*)$/);
+    if (headingMatch) {
+      flushParagraph();
+      flushList();
+      const level = headingMatch[1].length;
+      html.push(`<h${level}>${inlineMarkdown(headingMatch[2])}</h${level}>`);
+      continue;
+    }
+
+    const ulMatch = trimmed.match(/^[-*+]\s+(.+)/);
+    if (ulMatch) {
+      flushParagraph();
+      if (!list || list.type !== "ul") {
+        flushList();
+        list = { type: "ul", items: [] };
+      }
+      list.items.push(ulMatch[1]);
+      continue;
+    }
+
+    const olMatch = trimmed.match(/^\d+\.\s+(.+)/);
+    if (olMatch) {
+      flushParagraph();
+      if (!list || list.type !== "ol") {
+        flushList();
+        list = { type: "ol", items: [] };
+      }
+      list.items.push(olMatch[1]);
+      continue;
+    }
+
+    paragraph.push(trimmed);
+  }
+
+  flushParagraph();
+  flushList();
+  flushCode();
+
+  return html.join("");
+}
+
 function showSection(section, pushHistory = false) {
   if (!section) return;
   currentSection = section;
@@ -414,23 +587,7 @@ function setDetail(entry) {
   if (titleEl) titleEl.textContent = entry.title || entry.name || "Untitled";
   if (metaEl) metaEl.textContent = meta;
   if (bodyEl) {
-    const normalized = normalizeContent(entry.content) || "More details coming soon.";
-    const parts = normalized.split(/\n{2,}/);
-    const contentHTML = parts
-      .map((p) => {
-        if (p.trim().startsWith("-")) {
-          const items = p
-            .split(/\n/)
-            .map((line) => line.replace(/^\s*-\s?/, "").trim())
-            .filter(Boolean)
-            .map((li) => `<li>${li}</li>`)
-            .join("");
-          return `<ul>${items}</ul>`;
-        }
-        return `<p>${p.replace(/\n/g, "<br>")}</p>`;
-      })
-      .join("");
-
+    const contentHTML = renderMarkdown(entry.content) || "<p>More details coming soon.</p>";
     const downloadButton = entry.downloadUrl
       ? `<a href="${entry.downloadUrl}" target="_blank" rel="noopener noreferrer" class="download-btn">Download / Play</a>`
       : "";
