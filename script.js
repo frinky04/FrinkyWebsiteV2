@@ -210,6 +210,14 @@ function inlineMarkdown(text) {
     );
   });
 
+  working = working.replace(/(https?:\/\/[^\s<>"]+)/g, (url) => {
+    const safeHref = sanitizeUrl(url);
+    if (!safeHref) return url;
+    return addPlaceholder(
+      `<a href="${escapeHTML(safeHref)}" target="_blank" rel="noopener noreferrer">${escapeHTML(url)}</a>`
+    );
+  });
+
   working = working.replace(/\*\*([^*]+)\*\*/g, (_, boldText) => {
     return addPlaceholder(`<strong>${escapeHTML(boldText)}</strong>`);
   });
