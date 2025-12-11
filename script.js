@@ -121,7 +121,6 @@ function navigateRoute(route, pushHistory = false) {
     if (pushHistory) {
       history.pushState(route, "", routeToHash(route));
     }
-    updateMetaTags(route);
     showSection("detail", false);
     return;
   }
@@ -136,7 +135,6 @@ function navigateRoute(route, pushHistory = false) {
   if (pushHistory) {
     history.pushState({ section }, "", `#${section}`);
   }
-  updateMetaTags({ section });
   showSection(section, false);
 }
 
@@ -150,62 +148,6 @@ function normalizeContent(raw) {
     .map((l) => l.match(/^\s*/)[0].length);
   const pad = indents.length ? Math.min(...indents) : 0;
   return lines.map((l) => l.slice(pad)).join("\n");
-}
-
-function generateBlurb(content, maxWords = 20) {
-  if (!content) return "";
-  const normalized = normalizeContent(content);
-  const plainText = normalized
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, "")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/\*([^*]+)\*/g, "$1")
-    .replace(/#{1,3}\s+/g, "")
-    .replace(/\n+/g, " ")
-    .trim();
-  const words = plainText.split(/\s+/).filter(Boolean);
-  const blurb = words.slice(0, maxWords).join(" ");
-  return words.length > maxWords ? blurb + "..." : blurb;
-}
-
-function updateMetaTags(route) {
-  const baseUrl = window.location.origin;
-  let title = "Frinky";
-  let description = "Frinky's website";
-  let image = `${baseUrl}/images/frog.png`;
-  let url = `${baseUrl}/`;
-
-  if (route.section === "detail" && route.type && route.slug) {
-    const entry = findEntry(route.type, route.slug);
-    if (entry) {
-      title = entry.title || entry.name || "Untitled";
-      description = generateBlurb(entry.content, 20);
-      if (entry.image && route.type === "game") {
-        image = entry.image.startsWith("http") ? entry.image : `${baseUrl}/${entry.image}`;
-      }
-      url = `${baseUrl}/#detail-${route.type}-${route.slug}`;
-    }
-  }
-
-  const setMeta = (property, content) => {
-    let meta = document.querySelector(`meta[property="${property}"]`) ||
-               document.querySelector(`meta[name="${property}"]`);
-    if (meta) {
-      meta.setAttribute("content", content);
-    }
-  };
-
-  document.title = title;
-  setMeta("description", description);
-  setMeta("og:title", title);
-  setMeta("og:description", description);
-  setMeta("og:image", image);
-  setMeta("og:url", url);
-  setMeta("twitter:title", title);
-  setMeta("twitter:description", description);
-  setMeta("twitter:image", image);
-  setMeta("twitter:url", url);
 }
 
 function escapeHTML(str) {
@@ -762,7 +704,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const route = hasDetail && !detailEntry ? { section: "home" } : initialRoute;
 
   history.replaceState(route, "", routeToHash(route));
-  updateMetaTags(route);
   renderFeatured(featured);
   renderLists();
   renderAboutAge();
