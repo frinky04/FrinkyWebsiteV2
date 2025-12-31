@@ -184,6 +184,6 @@ window.CONTENT = {
     },
   ],
   experience: [
-    { date: "2022 - Present", title: "Full-time Remote Programmer & Gameplay Designer", meta: "Transience @ RESURGENT" },
+    { date: "2022 - 2025", title: "Full-time Remote Programmer & Gameplay Designer", meta: "Transience @ RESURGENT" },
   ],
 };
