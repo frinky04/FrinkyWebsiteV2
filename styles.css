@@ -615,7 +615,7 @@ a:hover {
 
 .about-window {
   background-image:
-    url("images/frog.png"),
+    url("/images/frog.png"),
     linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.75) 100%);
   background-size: cover, cover;
   background-position: center, center;

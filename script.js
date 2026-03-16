@@ -1,10 +1,21 @@
-const content = window.CONTENT || {};
+import { CONTENT } from "./src/generated/content.generated.js";
+
+const content = CONTENT || {};
 const games = content.games || [];
 const posts = content.posts || [];
 const featured = content.featured || games.find((g) => g.featured) || games[0];
+const experience = [
+  {
+    date: "2022 - 2025",
+    title: "Full-time Remote Programmer & Gameplay Designer",
+    meta: "Transience @ RESURGENT",
+  },
+];
 
 let currentSection = "home";
 const MAX_POSTS = 8;
+
+const ROUTE_SECTIONS = new Set(["home", "about", "contact", "posts-all", "games-all"]);
 
 function preloadImage(src, id) {
   if (!src) return;
@@ -51,14 +62,41 @@ function ensureLoader(el) {
   return loader;
 }
 
+function parseDate(dateString) {
+  const parsed = dateString ? new Date(dateString) : null;
+  if (!parsed || Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+function daysAgo(dateString) {
+  const target = parseDate(dateString);
+  if (!target) return "";
+  const now = new Date();
+  const ms = now - target;
+  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+  return `${days} days ago`;
+}
+
+function yearsAgo(dateString) {
+  const target = parseDate(dateString);
+  if (!target) return null;
+  const now = new Date();
+  let years = now.getFullYear() - target.getFullYear();
+  const hasHadBirthday =
+    now.getMonth() > target.getMonth() ||
+    (now.getMonth() === target.getMonth() && now.getDate() >= target.getDate());
+  if (!hasHadBirthday) years -= 1;
+  return Math.max(years, 0);
+}
+
 const FEEDS = {
   posts: {
     items: posts,
     type: "post",
-    meta: (item) => item.meta ?? (item.date ? daysAgo(item.date) : ""),
+    meta: (item) => daysAgo(item.sortDate || item.date),
   },
   experience: {
-    items: content.experience || [],
+    items: experience,
     type: "experience",
     meta: (item) => item.meta ?? "",
   },
@@ -69,281 +107,150 @@ const FEEDS = {
   },
 };
 
-function daysAgo(dateString) {
-  const target = dateString ? new Date(dateString) : null;
-  if (!target || Number.isNaN(target.getTime())) return "";
-  const now = new Date();
-  const ms = now - target;
-  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-  return `${days} days ago`;
+function cleanPath(pathname) {
+  if (!pathname || pathname === "/") return "/";
+  const trimmed = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  return `${trimmed}/`;
 }
 
-function yearsAgo(dateString) {
-  const target = dateString ? new Date(dateString) : null;
-  if (!target || Number.isNaN(target.getTime())) return null;
-  const now = new Date();
-  let years = now.getFullYear() - target.getFullYear();
-  const hasHadBirthday =
-    now.getMonth() > target.getMonth() ||
-    (now.getMonth() === target.getMonth() && now.getDate() >= target.getDate());
-  if (!hasHadBirthday) years -= 1;
-  return Math.max(years, 0);
-}
+function parseLegacyHash(hash) {
+  const clean = (hash || "").replace(/^#/, "").trim();
+  if (!clean) return null;
 
-function parseHash(hash) {
-  const clean = (hash || "").replace(/^#/, "");
-  if (!clean) return { section: "home" };
   if (clean.startsWith("detail-")) {
     const parts = clean.split("-");
     const type = parts[1];
     const slug = parts.slice(2).join("-");
-    if (type && slug) return { section: "detail", type, slug };
+    if ((type === "post" || type === "game") && slug) {
+      return { section: "detail", type, slug };
+    }
+    return { section: "home" };
   }
-  return { section: clean };
+
+  if (ROUTE_SECTIONS.has(clean)) {
+    return { section: clean };
+  }
+
+  return null;
 }
 
-function routeToHash(route) {
-  if (route.section === "detail" && route.type && route.slug) {
-    return `#detail-${route.type}-${route.slug}`;
-  }
-  const section = route.section || "home";
-  return `#${section}`;
+function parsePath(pathname) {
+  const path = cleanPath(pathname);
+  if (path === "/") return { section: "home" };
+  if (path === "/about/") return { section: "about" };
+  if (path === "/contact/") return { section: "contact" };
+  if (path === "/posts/") return { section: "posts-all" };
+  if (path === "/games/") return { section: "games-all" };
+
+  const postMatch = path.match(/^\/posts\/([a-z0-9-]+)\/$/);
+  if (postMatch) return { section: "detail", type: "post", slug: postMatch[1] };
+
+  const gameMatch = path.match(/^\/games\/([a-z0-9-]+)\/$/);
+  if (gameMatch) return { section: "detail", type: "game", slug: gameMatch[1] };
+
+  return null;
 }
 
-function navigateRoute(route, pushHistory = false) {
-  if (route.section === "detail" && route.type && route.slug) {
-    const entry = findEntry(route.type, route.slug);
-    if (!entry) {
-      navigateRoute({ section: "home" }, pushHistory);
-      return;
-    }
-    setDetail(entry);
-    if (pushHistory) {
-      history.pushState(route, "", routeToHash(route));
-    }
-    showSection("detail", false);
-    return;
+function parseLocationRoute() {
+  const hashRoute = parseLegacyHash(window.location.hash);
+  const pathRoute = parsePath(window.location.pathname);
+
+  if (hashRoute && hashRoute.section === "detail") {
+    return { ...hashRoute, fromLegacyHash: true };
   }
+
+  if (pathRoute) return pathRoute;
+
+  if (hashRoute) {
+    return { ...hashRoute, fromLegacyHash: true };
+  }
+
+  return { section: "home" };
+}
+
+function routeToPath(route) {
   if (route.section === "detail") {
-    navigateRoute({ section: "home" }, pushHistory);
-    return;
-  }
-  let section = route.section || "home";
-  if (!document.getElementById(`section-${section}`)) {
-    section = "home";
-  }
-  if (pushHistory) {
-    history.pushState({ section }, "", `#${section}`);
-  }
-  showSection(section, false);
-}
-
-function normalizeContent(raw) {
-  if (!raw) return "";
-  const lines = raw.split(/\r?\n/);
-  while (lines.length && lines[0].trim() === "") lines.shift();
-  while (lines.length && lines[lines.length - 1].trim() === "") lines.pop();
-  const indents = lines
-    .filter((l) => l.trim())
-    .map((l) => l.match(/^\s*/)[0].length);
-  const pad = indents.length ? Math.min(...indents) : 0;
-  return lines.map((l) => l.slice(pad)).join("\n");
-}
-
-function escapeHTML(str) {
-  return (str || "").replace(/[&<>"']/g, (char) => {
-    switch (char) {
-      case "&":
-        return "&amp;";
-      case "<":
-        return "&lt;";
-      case ">":
-        return "&gt;";
-      case '"':
-        return "&quot;";
-      case "'":
-        return "&#39;";
-      default:
-        return char;
-    }
-  });
-}
-
-function sanitizeUrl(url) {
-  const value = (url || "").trim();
-  if (!value) return "";
-  const lower = value.toLowerCase();
-  if (lower.startsWith("javascript:") || lower.startsWith("vbscript:") || lower.startsWith("data:text/html")) {
-    return "";
-  }
-  return value;
-}
-
-function inlineMarkdown(text) {
-  if (!text) return "";
-  const placeholders = [];
-  const addPlaceholder = (html) => {
-    const key = `__MD_${placeholders.length}__`;
-    placeholders.push({ key, html });
-    return key;
-  };
-
-  let working = text;
-
-  working = working.replace(/`([^`]+)`/g, (_, code) => {
-    return addPlaceholder(`<code>${escapeHTML(code)}</code>`);
-  });
-
-  working = working.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
-    const safeSrc = sanitizeUrl(src);
-    const safeAlt = escapeHTML(alt);
-    if (!safeSrc) return safeAlt;
-    return addPlaceholder(`<img src="${escapeHTML(safeSrc)}" alt="${safeAlt}" loading="lazy">`);
-  });
-
-  working = working.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => {
-    const safeHref = sanitizeUrl(href);
-    const safeLabel = escapeHTML(label);
-    if (!safeHref) return safeLabel;
-    return addPlaceholder(
-      `<a href="${escapeHTML(safeHref)}" target="_blank" rel="noopener noreferrer">${safeLabel}</a>`
-    );
-  });
-
-  working = working.replace(/(https?:\/\/[^\s<>"]+)/g, (url) => {
-    const safeHref = sanitizeUrl(url);
-    if (!safeHref) return url;
-    return addPlaceholder(
-      `<a href="${escapeHTML(safeHref)}" target="_blank" rel="noopener noreferrer">${escapeHTML(url)}</a>`
-    );
-  });
-
-  working = working.replace(/\*\*([^*]+)\*\*/g, (_, boldText) => {
-    return addPlaceholder(`<strong>${escapeHTML(boldText)}</strong>`);
-  });
-
-  working = working.replace(/\*([^*]+)\*/g, (_, italicText) => {
-    return addPlaceholder(`<em>${escapeHTML(italicText)}</em>`);
-  });
-
-  let escaped = escapeHTML(working);
-  placeholders.forEach(({ key, html }) => {
-    escaped = escaped.replace(key, html);
-  });
-  return escaped;
-}
-
-function renderMarkdown(raw) {
-  const text = normalizeContent(raw);
-  if (!text) return "";
-
-  const lines = text.split(/\r?\n/);
-  const html = [];
-  let list = null;
-  let paragraph = [];
-  let inCodeBlock = false;
-  let codeBuffer = [];
-
-  const flushParagraph = () => {
-    if (!paragraph.length) return;
-    html.push(`<p>${inlineMarkdown(paragraph.join(" "))}</p>`);
-    paragraph = [];
-  };
-
-  const flushList = () => {
-    if (!list) return;
-    const items = list.items.map((item) => `<li>${inlineMarkdown(item)}</li>`).join("");
-    html.push(`<${list.type}>${items}</${list.type}>`);
-    list = null;
-  };
-
-  const flushCode = () => {
-    if (!inCodeBlock) return;
-    html.push(`<pre><code>${escapeHTML(codeBuffer.join("\n"))}</code></pre>`);
-    codeBuffer = [];
-    inCodeBlock = false;
-  };
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    if (inCodeBlock) {
-      if (trimmed.startsWith("```")) {
-        flushCode();
-        continue;
-      }
-      codeBuffer.push(line.replace(/^\s{0,4}/, ""));
-      continue;
-    }
-
-    if (trimmed.startsWith("```")) {
-      flushParagraph();
-      flushList();
-      inCodeBlock = true;
-      codeBuffer = [];
-      continue;
-    }
-
-    if (trimmed === "") {
-      flushParagraph();
-      flushList();
-      continue;
-    }
-
-    const headingMatch = trimmed.match(/^(#{1,3})\s+(.*)$/);
-    if (headingMatch) {
-      flushParagraph();
-      flushList();
-      const level = headingMatch[1].length;
-      html.push(`<h${level}>${inlineMarkdown(headingMatch[2])}</h${level}>`);
-      continue;
-    }
-
-    const ulMatch = trimmed.match(/^[-*+]\s+(.+)/);
-    if (ulMatch) {
-      flushParagraph();
-      if (!list || list.type !== "ul") {
-        flushList();
-        list = { type: "ul", items: [] };
-      }
-      list.items.push(ulMatch[1]);
-      continue;
-    }
-
-    const olMatch = trimmed.match(/^\d+\.\s+(.+)/);
-    if (olMatch) {
-      flushParagraph();
-      if (!list || list.type !== "ol") {
-        flushList();
-        list = { type: "ol", items: [] };
-      }
-      list.items.push(olMatch[1]);
-      continue;
-    }
-
-    paragraph.push(trimmed);
+    if (route.type === "post") return `/posts/${route.slug}/`;
+    if (route.type === "game") return `/games/${route.slug}/`;
+    return "/";
   }
 
-  flushParagraph();
-  flushList();
-  flushCode();
-
-  return html.join("");
+  switch (route.section) {
+    case "home":
+      return "/";
+    case "about":
+      return "/about/";
+    case "contact":
+      return "/contact/";
+    case "posts-all":
+      return "/posts/";
+    case "games-all":
+      return "/games/";
+    default:
+      return "/";
+  }
 }
 
-function showSection(section, pushHistory = false) {
+function showSection(section) {
   if (!section) return;
   currentSection = section;
+
   document.querySelectorAll(".page-section").forEach((sec) => {
     const id = sec.id.replace("section-", "");
     sec.classList.toggle("hidden", id !== section);
   });
+
   document.querySelectorAll("[data-nav]").forEach((link) => {
     link.classList.toggle("active", link.dataset.nav === section);
   });
-  if (pushHistory) {
-    history.pushState({ section }, "", `#${section}`);
+}
+
+function findEntry(type, slug) {
+  const collection = type === "game" ? games : posts;
+  return collection.find((item) => item.slug === slug);
+}
+
+function updateHistory(route, mode = "none") {
+  if (mode === "none") return;
+  const method = mode === "replace" ? "replaceState" : "pushState";
+  history[method](route, "", routeToPath(route));
+}
+
+function navigateRoute(route, mode = "none") {
+  if (route.section === "detail") {
+    const entry = findEntry(route.type, route.slug);
+    if (!entry) {
+      const fallback = { section: "home" };
+      updateHistory(fallback, mode === "none" ? "none" : "replace");
+      showSection("home");
+      return;
+    }
+
+    setDetail(entry, route.type);
+    updateHistory({ section: "detail", type: route.type, slug: route.slug }, mode);
+    showSection("detail");
+    return;
   }
+
+  const section = ROUTE_SECTIONS.has(route.section) ? route.section : "home";
+  updateHistory({ section }, mode);
+  showSection(section);
+}
+
+function withExternalLinkAttrs(html) {
+  if (!html) return "";
+
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = html;
+  wrapper.querySelectorAll("a[href]").forEach((anchor) => {
+    const href = anchor.getAttribute("href") || "";
+    if (/^https?:\/\//i.test(href)) {
+      anchor.setAttribute("target", "_blank");
+      anchor.setAttribute("rel", "noopener noreferrer");
+    }
+  });
+
+  return wrapper.innerHTML;
 }
 
 function buildList(feed, listEl) {
@@ -366,16 +273,15 @@ function buildList(feed, listEl) {
     link.textContent = item.title || item.text || "Untitled";
 
     meta.className = "meta";
-    meta.textContent = type === "experience"
-      ? (typeof metaFn === "function" ? metaFn(item) : item.meta ?? "")
-      : item.date
-      ? daysAgo(item.date)
-      : typeof metaFn === "function"
-      ? metaFn(item)
-      : item.meta ?? "";
+    meta.textContent =
+      type === "experience"
+        ? typeof metaFn === "function"
+          ? metaFn(item)
+          : item.meta ?? ""
+        : typeof metaFn === "function"
+        ? metaFn(item)
+        : item.meta ?? "";
 
-    const fullContent = normalizeContent(item.content);
-    if (fullContent) li.dataset.content = fullContent;
     if (isDetailable) {
       li.dataset.slug = item.slug;
       li.dataset.type = type;
@@ -388,15 +294,6 @@ function buildList(feed, listEl) {
     li.append(date, link, meta);
     listEl.appendChild(li);
   });
-}
-
-function renderLists() {
-  renderPostsList();
-  renderGamesList();
-  renderAllPostsList();
-  renderAllGamesList();
-  const expList = document.querySelector("#experience-list");
-  buildList(FEEDS.experience, expList);
 }
 
 function renderPostsList() {
@@ -422,6 +319,15 @@ function renderAllGamesList() {
   const list = document.querySelector("#all-games-list");
   if (!list) return;
   buildList(FEEDS.games, list);
+}
+
+function renderLists() {
+  renderPostsList();
+  renderGamesList();
+  renderAllPostsList();
+  renderAllGamesList();
+  const expList = document.querySelector("#experience-list");
+  buildList(FEEDS.experience, expList);
 }
 
 function renderAboutAge() {
@@ -473,50 +379,49 @@ function setupContactActions() {
 
 function renderFeatured(game) {
   if (!game) return;
+
   const titleEl = document.querySelector("[data-slot='feature-title']");
   const windowEl = document.querySelector(".feature-window");
   const blurbEl = document.querySelector("#feature-blurb");
+
   if (titleEl) titleEl.textContent = "";
+
   const fallbackImage = findEntry("game", game.slug || "")?.image || games.find((g) => g.image)?.image;
   const heroImage = game.image || fallbackImage;
   preloadImage(heroImage, "preload-feature-image");
   setFeatureBackground(heroImage);
+
   if (blurbEl) {
     const title = game.title || game.name || "Untitled";
     const datePart = game.date ? `${game.date}` : "";
-    const ago = game.date ? ` (${daysAgo(game.date)})` : "";
-    const body = normalizeContent(game.content) || "No description available.";
+    const ago = game.sortDate || game.date ? ` (${daysAgo(game.sortDate || game.date)})` : "";
+    const body = game.summary || "No description available.";
+
     blurbEl.innerHTML = `
       <div class="feature-blurb-title">${title}</div>
-      <div class="blurb-body">${body.replace(/\n/g, "<br>")}</div>
+      <div class="blurb-body">${body}</div>
       <div class="detail-meta">${datePart}${ago}</div>
     `;
   }
-  if (windowEl) {
-    const hasHref = Boolean(game.href);
-    const hasSlug = Boolean(game.slug);
-    windowEl.classList.toggle("clickable", hasHref || hasSlug);
-    windowEl.onclick = null;
-    windowEl.onkeydown = null;
-    windowEl.tabIndex = hasHref || hasSlug ? 0 : -1;
 
-    const handleActivate = () => {
-      if (hasHref) {
-        window.location.href = game.href;
-      } else if (hasSlug) {
-        openDetail("game", game.slug);
-      }
+  if (windowEl) {
+    const hasSlug = Boolean(game.slug);
+    windowEl.classList.toggle("clickable", hasSlug);
+    windowEl.tabIndex = hasSlug ? 0 : -1;
+
+    const activate = () => {
+      if (hasSlug) openDetail("game", game.slug);
     };
 
-    if (hasHref || hasSlug) {
-      windowEl.addEventListener("click", handleActivate);
-      windowEl.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter" || ev.key === " ") {
-          ev.preventDefault();
-          handleActivate();
+    windowEl.onclick = hasSlug ? activate : null;
+    windowEl.onkeydown = hasSlug
+      ? (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            activate();
+          }
         }
-      });
-    }
+      : null;
   }
 }
 
@@ -568,24 +473,10 @@ function setFeatureBackground(image) {
 }
 
 function openDetail(type, slug) {
-  const entry = findEntry(type, slug);
-  if (!entry) return;
-  setDetail(entry);
-  const state = { section: "detail", type, slug };
-  if (history.state?.section === "detail" && history.state.slug === slug && history.state.type === type) {
-    showSection("detail", false);
-    return;
-  }
-  history.pushState(state, "", routeToHash(state));
-  showSection("detail", false);
+  navigateRoute({ section: "detail", type, slug }, "push");
 }
 
-function findEntry(type, slug) {
-  const collection = type === "game" ? games : posts;
-  return collection.find((item) => item.slug === slug);
-}
-
-function setDetail(entry) {
+function setDetail(entry, type) {
   const detailSection = document.getElementById("section-detail");
   const titleEl = detailSection?.querySelector(".detail-title");
   const metaEl = detailSection?.querySelector(".detail-meta");
@@ -595,10 +486,11 @@ function setDetail(entry) {
   if (titleEl) titleEl.textContent = entry.title || entry.name || "Untitled";
   if (metaEl) metaEl.textContent = meta;
   if (bodyEl) {
-    const contentHTML = renderMarkdown(entry.content) || "<p>More details coming soon.</p>";
-    const downloadButton = entry.downloadUrl
-      ? `<a href="${entry.downloadUrl}" target="_blank" rel="noopener noreferrer" class="download-btn">Download / Play</a>`
-      : "";
+    const contentHTML = withExternalLinkAttrs(entry.contentHtml) || "<p>More details coming soon.</p>";
+    const downloadButton =
+      type === "game" && entry.downloadUrl
+        ? `<a href="${entry.downloadUrl}" target="_blank" rel="noopener noreferrer" class="download-btn">Download / Play</a>`
+        : "";
 
     bodyEl.innerHTML = contentHTML + downloadButton;
   }
@@ -612,6 +504,7 @@ function setDetailHero(image) {
   const token = Symbol("detail-bg");
   hero._bgToken = token;
   const placeholder = "linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.6))";
+
   if (!image) {
     hero.classList.remove("loading");
     hero.style.backgroundImage = placeholder;
@@ -620,12 +513,14 @@ function setDetailHero(image) {
     hero.style.backgroundBlendMode = "overlay";
     return;
   }
+
   hero.classList.add("loading");
   hero.style.backgroundImage = placeholder;
   hero.style.backgroundSize = "cover";
   hero.style.backgroundPosition = "center";
   hero.style.backgroundBlendMode = "overlay";
   preloadImage(image, "preload-detail-image");
+
   loadImage(image)
     .then(() => {
       if (hero._bgToken !== token) return;
@@ -657,57 +552,45 @@ function setupNav() {
       ev.preventDefault();
       const target = link.dataset.nav;
       if (!target) return;
-      const state = { section: target };
-      history.pushState(state, "", `#${target}`);
-      showSection(target, false);
+      navigateRoute({ section: target }, "push");
     });
   });
+
   const postsAll = document.querySelector("[data-action='view-all-posts']");
   if (postsAll) {
     postsAll.addEventListener("click", (ev) => {
       ev.preventDefault();
-      history.pushState({ section: "posts-all" }, "", "#posts-all");
-      showSection("posts-all", false);
+      navigateRoute({ section: "posts-all" }, "push");
     });
   }
+
   const gamesAll = document.querySelector("[data-action='view-all-games']");
   if (gamesAll) {
     gamesAll.addEventListener("click", (ev) => {
       ev.preventDefault();
-      history.pushState({ section: "games-all" }, "", "#games-all");
-      showSection("games-all", false);
+      navigateRoute({ section: "games-all" }, "push");
     });
   }
+
   document.querySelectorAll("[data-action='back-home']").forEach((backHome) => {
     backHome.addEventListener("click", (ev) => {
       ev.preventDefault();
-      history.pushState({ section: "home" }, "", "#home");
-      showSection("home", false);
+      navigateRoute({ section: "home" }, "push");
     });
   });
 }
 
-window.addEventListener("popstate", (event) => {
-  const state = event.state;
-  if (state) {
-    navigateRoute(state, false);
-    return;
-  }
-  const route = parseHash(window.location.hash);
-  navigateRoute(route, false);
+window.addEventListener("popstate", () => {
+  navigateRoute(parseLocationRoute(), "none");
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const initialRoute = parseHash(window.location.hash);
-  const hasDetail = initialRoute.section === "detail" && initialRoute.type && initialRoute.slug;
-  const detailEntry = hasDetail ? findEntry(initialRoute.type, initialRoute.slug) : null;
-  const route = hasDetail && !detailEntry ? { section: "home" } : initialRoute;
-
-  history.replaceState(route, "", routeToHash(route));
   renderFeatured(featured);
   renderLists();
   renderAboutAge();
   setupContactActions();
   setupNav();
-  navigateRoute(route, false);
+
+  const initialRoute = parseLocationRoute();
+  navigateRoute(initialRoute, "replace");
 });
