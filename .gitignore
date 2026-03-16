@@ -2,3 +2,9 @@ Reference.png
 AGENTS.md
 node_modules/
 dist/
+src/generated/content.generated.js
+public/images/
+public/svgs/
+public/sitemap.xml
+public/rss.xml
+public/robots.txt
