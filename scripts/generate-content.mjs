@@ -32,6 +32,37 @@ const SITE_BASE = {
   url: SITE_URL,
 };
 
+marked.use({
+  extensions: [
+    {
+      name: "spoiler",
+      level: "inline",
+      start(src) {
+        return src.indexOf("||");
+      },
+      tokenizer(src) {
+        if (!src.startsWith("||")) return undefined;
+        const match = /^\|\|([\s\S]+?)\|\|/.exec(src);
+        if (!match) return undefined;
+
+        const raw = match[0];
+        const text = match[1];
+        if (!text) return undefined;
+
+        return {
+          type: "spoiler",
+          raw,
+          text,
+          tokens: this.lexer.inlineTokens(text),
+        };
+      },
+      renderer(token) {
+        return `<span class="md-spoiler" tabindex="0">${this.parser.parseInline(token.tokens)}</span>`;
+      },
+    },
+  ],
+});
+
 marked.setOptions({
   gfm: true,
   breaks: false,
@@ -131,6 +162,7 @@ function stripMarkdownExcerpt(markdown) {
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
     .replace(/^#{1,6}\s+/gm, "")
     .replace(/^>\s?/gm, "")
+    .replace(/\|\|/g, "")
     .replace(/[*_~]/g, "")
     .trim();
 
@@ -146,6 +178,7 @@ function sanitizeAndRenderMarkdown(markdown) {
     allowedTags: [
       "p",
       "a",
+      "span",
       "img",
       "strong",
       "em",
@@ -172,6 +205,7 @@ function sanitizeAndRenderMarkdown(markdown) {
     ],
     allowedAttributes: {
       a: ["href", "title", "target", "rel"],
+      span: ["class", "tabindex"],
       img: ["src", "alt", "title", "loading"],
       code: ["class"],
       th: ["colspan", "rowspan", "align"],

@@ -43,3 +43,27 @@ a:hover {
 .muted {
   color: var(--muted);
 }
+
+.md-spoiler {
+  display: inline;
+  color: transparent;
+  background: rgba(220, 220, 220, 0.14);
+  border-radius: 3px;
+  padding: 0 0.2em;
+  cursor: pointer;
+  user-select: none;
+  text-shadow: none;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.md-spoiler * {
+  color: inherit !important;
+}
+
+.md-spoiler:hover,
+.md-spoiler:focus-visible {
+  color: inherit;
+  background: rgba(220, 220, 220, 0.26);
+  user-select: text;
+  outline: none;
+}
