@@ -176,7 +176,7 @@ title: New Game
 slug: new-game
 date: Coming Soon
 sortDate: "2026-12-01"
-image: images/new-game.webp
+image: images/new-game.png
 summary: Quick game summary.
 featured: false
 pinned: false
@@ -244,7 +244,7 @@ Example iframe (YouTube):
 Example local video:
 
 ```html
-<video controls preload="metadata" poster="/images/preview.webp">
+<video controls preload="metadata" poster="/images/preview.png">
   <source src="/videos/demo.mp4" type="video/mp4" />
 </video>
 ```

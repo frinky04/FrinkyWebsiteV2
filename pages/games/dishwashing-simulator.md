@@ -3,7 +3,7 @@ title: Dishwashing Simulator
 slug: dishwashing-simulator
 date: 03 April 2024
 sortDate: "2024-04-03"
-image: images/dishwashing-simulator.webp
+image: images/dishwashing-simulator.png
 downloadUrl: https://store.steampowered.com/app/2747780/Dishwashing_Simulator/
 summary: A short, unique survival-farming-base-building-tycoon-horror game where washing dishes is the core loop.
 ---

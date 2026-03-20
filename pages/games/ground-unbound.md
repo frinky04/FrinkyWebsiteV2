@@ -3,7 +3,7 @@ title: Ground Unbound
 slug: ground-unbound
 date: 08 Oct 2021
 sortDate: "2021-10-08"
-image: images/ground-unbound.webp
+image: images/ground-unbound.png
 downloadUrl: https://store.steampowered.com/app/1760020/GROUNDUNBOUND/
 summary: A procedurally generated, high-intensity movement shooter with roguelike progression.
 ---

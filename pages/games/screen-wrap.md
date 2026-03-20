@@ -3,7 +3,7 @@ title: Screen Wrap
 slug: screen-wrap
 date: 02 Aug 2025
 sortDate: "2025-08-02"
-image: images/screen_wrap.webp
+image: images/screen_wrap.png
 downloadUrl: https://frinkyyy.itch.io/screenwrap
 summary: A short top-down atmospheric puzzle game about boundary warp and screen wrap.
 ---

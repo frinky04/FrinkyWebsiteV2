@@ -3,7 +3,7 @@ title: Infinite Golf
 slug: infinite-golf
 date: 07 Feb 2024
 sortDate: "2024-02-07"
-image: images/infinite_golf.webp
+image: images/infinite_golf.png
 downloadUrl: https://frinkyyy.itch.io/infinite-golf
 summary: A zen-like golf experience where you can relax while sinking shots.
 ---
