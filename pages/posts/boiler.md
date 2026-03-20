@@ -4,6 +4,7 @@ slug: boiler
 date: March 18 2026
 sortDate: "March 18 2026"
 summary: boiler is a small CLI that makes Steam uploads feel less like paperwork.
+image: images/boiler.png
 
 ---
 
@@ -11,7 +12,7 @@ summary: boiler is a small CLI that makes Steam uploads feel less like paperwork
 
 That's the summary, I've been fairly unhappy with the Steamworks UX, especially for uploading games, so this is my solution. You can now push builds with a very simple command: `boiler push`
 
-If you are a noob having some trouble with the steam upload process, this tool should help. I still remeber 6 years ago, when I was 15, trying to figure out how to upload my game to Steam was a full days worth of fiddling around. s
+If you are a noob having some trouble with the steam upload process, this tool should help. I still remeber 6 years ago, when I was 15, trying to figure out how to upload my game to Steam was a full days worth of fiddling around.
 
 I created this mostly to reduce headaches internally for uploading to Steam, but hopefully someone else can find it useful.
 
