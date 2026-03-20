@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { defineConfig } from "vite";
 import { generateContent } from "./scripts/generate-content.mjs";
-import { formatBirthDateLabel, formatDateWithRelative, formatEntryMeta } from "./src/app/date.js";
+import { formatBirthDateLabel, formatDateWithRelative, formatEntryMeta, yearsAgo } from "./src/app/date.js";
 import { DEFAULT_IMAGE_PATH, getRouteMeta } from "./src/app/route-meta.js";
 import { routeToPath } from "./src/app/routing.js";
 
@@ -164,11 +164,12 @@ function applySharedContent(html, payload) {
   output = replaceElementInnerById(output, "feature-blurb", renderFeaturedBlurb(featured));
   output = replaceElementInnerById(output, "about-name", escapeHtml(about.name || "Finn Rawlings (Frinky)"));
   output = replaceElementInnerById(output, "about-content", about.contentHtml || "");
-  output = replaceElementInnerById(
-    output,
-    "about-age",
-    escapeHtml(formatBirthDateLabel(about.birthDate))
-  );
+  {
+    const birthDate = String(about.birthDate || "").trim();
+    const age = yearsAgo(birthDate);
+    const ageText = birthDate ? (age !== null ? `${birthDate} (age ${age})` : birthDate) : "";
+    output = replaceElementInnerById(output, "about-age", escapeHtml(ageText));
+  }
 
   output = updateOpeningTagById(output, "feature-link", (attrs) => {
     let next = setAttributeInAttrs(attrs, "href", featured ? entryPath({ ...featured, type: "game" }) : "/games/");

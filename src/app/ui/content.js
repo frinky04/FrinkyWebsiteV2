@@ -1,4 +1,4 @@
-import { formatBirthDateLabel } from "../date.js";
+import { yearsAgo } from "../date.js";
 import { withExternalLinkAttrs } from "./helpers.js";
 
 export function renderHomeIntro(model) {
@@ -10,14 +10,14 @@ export function renderHomeIntro(model) {
 
 export function renderAbout(model) {
   const about = model.about || {};
-  const aboutWindow = document.querySelector(".about-window");
+  const aboutAvatar = document.querySelector(".about-avatar");
   const aboutImage = document.querySelector("#about-image");
   const aboutNameEl = document.querySelector("#about-name");
   const aboutContentEl = document.querySelector("#about-content");
   const aboutAgeEl = document.querySelector("#about-age");
 
-  if (aboutWindow && about.imageAlt) {
-    aboutWindow.setAttribute("aria-label", about.imageAlt);
+  if (aboutAvatar && about.imageAlt) {
+    aboutAvatar.setAttribute("aria-label", about.imageAlt);
   }
 
   if (aboutImage) {
@@ -27,7 +27,13 @@ export function renderAbout(model) {
 
   if (aboutNameEl) aboutNameEl.textContent = about.name || "";
   if (aboutContentEl) aboutContentEl.innerHTML = withExternalLinkAttrs(about.contentHtml || "");
-  if (aboutAgeEl) aboutAgeEl.textContent = formatBirthDateLabel(about.birthDate);
+  if (aboutAgeEl) {
+    const birthDate = String(about.birthDate || "").trim();
+    if (birthDate) {
+      const age = yearsAgo(birthDate);
+      aboutAgeEl.textContent = age !== null ? `${birthDate} (age ${age})` : birthDate;
+    }
+  }
 }
 
 export function setupContactActions() {
@@ -35,14 +41,13 @@ export function setupContactActions() {
   if (!emailBtn) return;
 
   const email = emailBtn.dataset.email || "";
-  const labelEl = emailBtn.querySelector(".social-label");
-  const originalLabel = labelEl?.textContent || "Copy email";
+  const metaEl = document.querySelector(".contact-email-meta");
+  const originalLabel = emailBtn.textContent || "Copy";
 
-  const setLabel = (text) => {
-    if (!labelEl) return;
-    labelEl.textContent = text;
+  const setFeedback = (text) => {
+    emailBtn.textContent = text;
     setTimeout(() => {
-      labelEl.textContent = originalLabel;
+      emailBtn.textContent = originalLabel;
     }, 1500);
   };
 
@@ -64,9 +69,9 @@ export function setupContactActions() {
         document.body.removeChild(textarea);
       }
 
-      setLabel("Copied!");
+      setFeedback("Copied!");
     } catch {
-      setLabel("Copy failed");
+      setFeedback("Failed");
     }
   });
 }
