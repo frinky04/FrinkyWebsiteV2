@@ -117,6 +117,30 @@
   border: 1px solid #1f1f1f;
 }
 
+.detail-body .md-embed {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 10px 0;
+  border-radius: 2px;
+  background: #050505;
+  border: 1px solid #1f1f1f;
+}
+
+.detail-body iframe.md-embed-video {
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 220px;
+}
+
+.detail-body iframe.md-embed-itch {
+  min-height: 167px;
+}
+
+.detail-body video.md-embed {
+  height: auto;
+}
+
 .download-btn {
   display: inline-block;
   margin-top: 14px;

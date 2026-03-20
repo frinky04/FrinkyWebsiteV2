@@ -215,6 +215,45 @@ Supported (sanitized):
 
 Generated links/images are normalized and sanitized.
 
+### Embeds (Posts/Games Only)
+
+Embeds are enabled for:
+- `pages/posts/*.md`
+- `pages/games/*.md`
+
+Embeds are not enabled for:
+- `home`
+- `about`
+- `experience`
+
+Use raw HTML iframe/video tags in post/game bodies.
+
+Example iframe (YouTube):
+
+```html
+<iframe
+  src="https://www.youtube.com/embed/VIDEO_ID"
+  title="YouTube video player"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowfullscreen
+></iframe>
+```
+
+Example local video:
+
+```html
+<video controls preload="metadata" poster="/images/preview.webp">
+  <source src="/videos/demo.mp4" type="video/mp4" />
+</video>
+```
+
+Allowed iframe hosts:
+- `youtube.com`
+- `youtube-nocookie.com`
+- `player.vimeo.com`
+- `itch.io`
+- `store.steampowered.com`
+
 ## Media Files
 
 Place assets in:

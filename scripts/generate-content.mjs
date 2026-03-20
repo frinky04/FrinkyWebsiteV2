@@ -32,6 +32,57 @@ const SITE_BASE = {
   url: SITE_URL,
 };
 
+const EMBED_IFRAME_HOSTNAMES = [
+  "youtube.com",
+  "www.youtube.com",
+  "youtube-nocookie.com",
+  "www.youtube-nocookie.com",
+  "player.vimeo.com",
+  "itch.io",
+  "www.itch.io",
+  "store.steampowered.com",
+];
+
+function classifyEmbedSource(url) {
+  if (!url) return "";
+
+  try {
+    const { hostname } = new URL(url);
+    const host = hostname.toLowerCase();
+
+    if (host.includes("youtube.com") || host.includes("youtube-nocookie.com") || host.includes("vimeo.com")) {
+      return "video";
+    }
+    if (host.includes("itch.io")) return "itch";
+    if (host.includes("steampowered.com")) return "steam";
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
+function normalizeEmbedUrl(url) {
+  const value = (url || "").trim();
+  if (!/^https?:\/\//i.test(value)) return "";
+  return value;
+}
+
+function appendClass(existing, value) {
+  const classes = new Set(
+    String(existing || "")
+      .split(/\s+/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+  );
+
+  for (const className of value) {
+    if (className) classes.add(className);
+  }
+
+  return [...classes].join(" ");
+}
+
 marked.use({
   extensions: [
     {
@@ -160,6 +211,7 @@ function stripMarkdownExcerpt(markdown) {
     .replace(/`([^`]+)`/g, "$1")
     .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/<[^>]+>/g, "")
     .replace(/^#{1,6}\s+/gm, "")
     .replace(/^>\s?/gm, "")
     .replace(/\|\|/g, "")
@@ -171,69 +223,148 @@ function stripMarkdownExcerpt(markdown) {
   return (firstLine || "").trim();
 }
 
-function sanitizeAndRenderMarkdown(markdown) {
+function sanitizeAndRenderMarkdown(markdown, options = {}) {
+  const { allowEmbeds = false } = options;
   const rendered = marked.parse(markdown).trim();
+  const allowedTags = [
+    "p",
+    "a",
+    "span",
+    "img",
+    "strong",
+    "em",
+    "code",
+    "pre",
+    "blockquote",
+    "ul",
+    "ol",
+    "li",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "hr",
+    "br",
+    "table",
+    "thead",
+    "tbody",
+    "tr",
+    "th",
+    "td",
+  ];
 
-  const sanitized = sanitizeHtml(rendered, {
-    allowedTags: [
-      "p",
-      "a",
-      "span",
-      "img",
-      "strong",
-      "em",
-      "code",
-      "pre",
-      "blockquote",
-      "ul",
-      "ol",
-      "li",
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-      "hr",
-      "br",
-      "table",
-      "thead",
-      "tbody",
-      "tr",
-      "th",
-      "td",
-    ],
-    allowedAttributes: {
-      a: ["href", "title", "target", "rel"],
-      span: ["class", "tabindex"],
-      img: ["src", "alt", "title", "loading"],
-      code: ["class"],
-      th: ["colspan", "rowspan", "align"],
-      td: ["colspan", "rowspan", "align"],
-    },
-    allowedSchemes: ["http", "https", "mailto", "tel"],
-    allowProtocolRelative: false,
-    transformTags: {
-      a: (tagName, attribs) => {
-        const href = normalizeUrl(attribs.href || "");
-        const isExternal = /^https?:\/\//i.test(href);
-        return {
-          tagName,
-          attribs: {
-            ...attribs,
-            href,
-            ...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {}),
-          },
-        };
-      },
-      img: (tagName, attribs) => ({
+  const allowedAttributes = {
+    a: ["href", "title", "target", "rel"],
+    span: ["class", "tabindex"],
+    img: ["src", "alt", "title", "loading"],
+    code: ["class"],
+    th: ["colspan", "rowspan", "align"],
+    td: ["colspan", "rowspan", "align"],
+  };
+
+  if (allowEmbeds) {
+    allowedTags.push("iframe", "video", "source");
+    allowedAttributes.iframe = [
+      "src",
+      "title",
+      "width",
+      "height",
+      "allow",
+      "allowfullscreen",
+      "frameborder",
+      "loading",
+      "referrerpolicy",
+      "class",
+    ];
+    allowedAttributes.video = [
+      "src",
+      "poster",
+      "preload",
+      "controls",
+      "autoplay",
+      "muted",
+      "loop",
+      "playsinline",
+      "class",
+    ];
+    allowedAttributes.source = ["src", "type"];
+  }
+
+  const transformTags = {
+    a: (tagName, attribs) => {
+      const href = normalizeUrl(attribs.href || "");
+      const isExternal = /^https?:\/\//i.test(href);
+      return {
         tagName,
         attribs: {
           ...attribs,
-          src: normalizeUrl(attribs.src || ""),
-          loading: "lazy",
+          href,
+          ...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {}),
         },
-      }),
+      };
+    },
+    img: (tagName, attribs) => ({
+      tagName,
+      attribs: {
+        ...attribs,
+        src: normalizeUrl(attribs.src || ""),
+        loading: "lazy",
+      },
+    }),
+  };
+
+  if (allowEmbeds) {
+    transformTags.iframe = (tagName, attribs) => {
+      const src = normalizeEmbedUrl(attribs.src || "");
+      const sourceType = classifyEmbedSource(src);
+      const className = appendClass(attribs.class, ["md-embed", "md-embed-iframe", sourceType && `md-embed-${sourceType}`]);
+
+      return {
+        tagName,
+        attribs: {
+          ...attribs,
+          src,
+          loading: "lazy",
+          referrerpolicy: attribs.referrerpolicy || "strict-origin-when-cross-origin",
+          frameborder: attribs.frameborder || "0",
+          class: className,
+        },
+      };
+    };
+
+    transformTags.video = (tagName, attribs) => ({
+      tagName,
+      attribs: {
+        ...attribs,
+        src: normalizeUrl(attribs.src || ""),
+        preload: attribs.preload || "metadata",
+        controls: attribs.controls === undefined ? "controls" : attribs.controls,
+        class: appendClass(attribs.class, ["md-embed", "md-embed-video"]),
+      },
+    });
+
+    transformTags.source = (tagName, attribs) => ({
+      tagName,
+      attribs: {
+        ...attribs,
+        src: normalizeUrl(attribs.src || ""),
+      },
+    });
+  }
+
+  const sanitized = sanitizeHtml(rendered, {
+    allowedTags,
+    allowedAttributes,
+    allowedSchemes: ["http", "https", "mailto", "tel"],
+    allowProtocolRelative: false,
+    allowedIframeHostnames: allowEmbeds ? EMBED_IFRAME_HOSTNAMES : [],
+    transformTags,
+    exclusiveFilter(frame) {
+      if (!allowEmbeds) return false;
+      if (frame.tag === "iframe" && !frame.attribs.src) return true;
+      return false;
     },
   });
 
@@ -348,7 +479,7 @@ async function readCollection({ type, dir }) {
       order: frontmatter.order ?? null,
       image: normalizeUrl(frontmatter.image || ""),
       downloadUrl: frontmatter.downloadUrl || "",
-      contentHtml: sanitizeAndRenderMarkdown(content),
+      contentHtml: sanitizeAndRenderMarkdown(content, { allowEmbeds: true }),
     });
   }
 
