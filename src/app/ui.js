@@ -1,4 +1,5 @@
 import { daysAgo, yearsAgo } from "./date.js";
+import { routeToPath } from "./routing.js";
 
 function preloadImage(src, id) {
   if (!src) return;
@@ -62,6 +63,10 @@ function withExternalLinkAttrs(html) {
   return wrapper.innerHTML;
 }
 
+function isPlainLeftClick(event) {
+  return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+}
+
 export function createUI({ model, onOpenDetail, onNavigateSection }) {
   const feeds = {
     posts: {
@@ -110,7 +115,6 @@ export function createUI({ model, onOpenDetail, onNavigateSection }) {
       date.textContent = item.date ? `[${item.date}]` : "";
 
       link.className = "link";
-      if (isDetailable) link.href = "#";
       link.textContent = item.title || item.text || "Untitled";
 
       meta.className = "meta";
@@ -124,9 +128,12 @@ export function createUI({ model, onOpenDetail, onNavigateSection }) {
           : item.meta ?? "";
 
       if (isDetailable) {
+        const route = { section: "detail", type, slug: item.slug };
         li.dataset.slug = item.slug;
         li.dataset.type = type;
+        link.href = routeToPath(route);
         link.addEventListener("click", (ev) => {
+          if (!isPlainLeftClick(ev)) return;
           ev.preventDefault();
           onOpenDetail(type, item.slug);
         });
@@ -303,10 +310,13 @@ export function createUI({ model, onOpenDetail, onNavigateSection }) {
     if (!game) return;
 
     const titleEl = document.querySelector("[data-slot='feature-title']");
-    const windowEl = document.querySelector(".feature-window");
+    const windowEl = document.querySelector("[data-feature-link]");
     const blurbEl = document.querySelector("#feature-blurb");
+    const title = game.title || "Untitled";
+    const detailRoute = game.slug ? { section: "detail", type: "game", slug: game.slug } : { section: "games-all" };
+    const detailPath = routeToPath(detailRoute);
 
-    if (titleEl) titleEl.textContent = "";
+    if (titleEl) titleEl.textContent = title;
 
     const fallbackImage = model.findEntry("game", game.slug || "")?.image || model.games.find((g) => g.image)?.image;
     const heroImage = game.image || fallbackImage;
@@ -314,35 +324,36 @@ export function createUI({ model, onOpenDetail, onNavigateSection }) {
     setFeatureBackground(heroImage);
 
     if (blurbEl) {
-      const title = game.title || "Untitled";
       const datePart = game.date ? `${game.date}` : "";
       const relative = daysAgo(game.sortDate || game.date);
       const ago = relative ? ` (${relative})` : "";
       const body = game.summary || "No description available.";
 
-      blurbEl.innerHTML = `
-        <div class="feature-blurb-title">${title}</div>
-        <div class="blurb-body">${body}</div>
-        <div class="detail-meta">${datePart}${ago}</div>
-      `;
+      const titleNode = document.createElement("div");
+      titleNode.className = "feature-blurb-title";
+      titleNode.textContent = title;
+
+      const bodyNode = document.createElement("div");
+      bodyNode.className = "blurb-body";
+      bodyNode.textContent = body;
+
+      const metaNode = document.createElement("div");
+      metaNode.className = "detail-meta";
+      metaNode.textContent = `${datePart}${ago}`;
+
+      blurbEl.replaceChildren(titleNode, bodyNode, metaNode);
     }
 
     if (windowEl) {
       const hasSlug = Boolean(game.slug);
       windowEl.classList.toggle("clickable", hasSlug);
-      windowEl.tabIndex = hasSlug ? 0 : -1;
-
-      const activate = () => {
-        if (hasSlug) onOpenDetail("game", game.slug);
-      };
-
-      windowEl.onclick = hasSlug ? activate : null;
-      windowEl.onkeydown = hasSlug
+      windowEl.href = detailPath;
+      windowEl.setAttribute("aria-label", hasSlug ? `Open ${title}` : title);
+      windowEl.onclick = hasSlug
         ? (ev) => {
-            if (ev.key === "Enter" || ev.key === " ") {
-              ev.preventDefault();
-              activate();
-            }
+            if (!isPlainLeftClick(ev)) return;
+            ev.preventDefault();
+            onOpenDetail("game", game.slug);
           }
         : null;
     }
@@ -405,12 +416,17 @@ export function createUI({ model, onOpenDetail, onNavigateSection }) {
 
     if (bodyEl) {
       const contentHtml = withExternalLinkAttrs(entry.contentHtml) || "<p>More details coming soon.</p>";
-      const downloadButton =
-        type === "game" && entry.downloadUrl
-          ? `<a href="${entry.downloadUrl}" target="_blank" rel="noopener noreferrer" class="download-btn">Download / Play</a>`
-          : "";
+      bodyEl.innerHTML = contentHtml;
 
-      bodyEl.innerHTML = contentHtml + downloadButton;
+      if (type === "game" && entry.downloadUrl) {
+        const downloadLink = document.createElement("a");
+        downloadLink.className = "download-btn";
+        downloadLink.href = entry.downloadUrl;
+        downloadLink.target = "_blank";
+        downloadLink.rel = "noopener noreferrer";
+        downloadLink.textContent = "Download / Play";
+        bodyEl.appendChild(downloadLink);
+      }
     }
 
     setDetailHero(entry.image);
@@ -419,6 +435,7 @@ export function createUI({ model, onOpenDetail, onNavigateSection }) {
   function setupNav() {
     document.querySelectorAll("[data-nav]").forEach((link) => {
       link.addEventListener("click", (ev) => {
+        if (!isPlainLeftClick(ev)) return;
         ev.preventDefault();
         const target = link.dataset.nav;
         if (target) onNavigateSection(target);
@@ -428,6 +445,7 @@ export function createUI({ model, onOpenDetail, onNavigateSection }) {
     const postsAll = document.querySelector("[data-action='view-all-posts']");
     if (postsAll) {
       postsAll.addEventListener("click", (ev) => {
+        if (!isPlainLeftClick(ev)) return;
         ev.preventDefault();
         onNavigateSection("posts-all");
       });
@@ -436,6 +454,7 @@ export function createUI({ model, onOpenDetail, onNavigateSection }) {
     const gamesAll = document.querySelector("[data-action='view-all-games']");
     if (gamesAll) {
       gamesAll.addEventListener("click", (ev) => {
+        if (!isPlainLeftClick(ev)) return;
         ev.preventDefault();
         onNavigateSection("games-all");
       });
@@ -443,6 +462,7 @@ export function createUI({ model, onOpenDetail, onNavigateSection }) {
 
     document.querySelectorAll("[data-action='back-home']").forEach((backHome) => {
       backHome.addEventListener("click", (ev) => {
+        if (!isPlainLeftClick(ev)) return;
         ev.preventDefault();
         onNavigateSection("home");
       });

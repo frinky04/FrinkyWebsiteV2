@@ -21,7 +21,7 @@
         <section class="nav-box">
           <div class="nav">
             <div class="nav-left">
-              <a href="#" data-nav="home">home</a><a href="#" data-nav="contact">contact</a><a href="#" data-nav="about">about</a>
+              <a href="/" data-nav="home">home</a><a href="/contact/" data-nav="contact">contact</a><a href="/about/" data-nav="about">about</a>
             </div>
             <div class="nav-right">
               <a href="https://www.github.com/frinky04" target="_blank" rel="noopener noreferrer">github</a><a href="https://www.twitter.com/frinky13" target="_blank" rel="noopener noreferrer">twitter</a><a href="https://www.youtube.com/@frinky" target="_blank" rel="noopener noreferrer">youtube</a>
@@ -37,18 +37,18 @@
           <section class="section games">
             <div class="section-head">
               <h2>Games</h2>
-              <a href="#" class="view-all" data-action="view-all-games">view all</a>
+              <a href="/games/" class="view-all" data-action="view-all-games">view all</a>
             </div>
             <div class="catalogue-grid">
               <div class="feature-card">
                 <div class="feature-header">LATEST</div>
                 <div class="feature-body">
-                  <div class="feature-window">
+                  <a href="/games/" class="feature-window" id="feature-link" data-feature-link aria-label="Open featured game">
                     <div class="scanlines"></div>
                     <div class="feature-overlay">
-                      <div class="feature-title" data-slot="feature-title">example project</div>
+                      <div class="feature-title" id="feature-title" data-slot="feature-title">example project</div>
                     </div>
-                  </div>
+                  </a>
                   <div class="feature-blurb" id="feature-blurb"></div>
                 </div>
               </div>
@@ -59,7 +59,7 @@
           <section class="section posts">
             <div class="section-head">
               <h2>Posts</h2>
-              <a href="#" class="view-all" data-action="view-all-posts">view all</a>
+              <a href="/posts/" class="view-all" data-action="view-all-posts">view all</a>
             </div>
             <ul class="list" id="registry-list" data-feed="posts"></ul>
           </section>
@@ -75,7 +75,7 @@
         <section class="page-section section posts hidden" id="section-posts-all">
           <div class="section-head">
             <h2>All Posts</h2>
-            <a href="#" class="view-all" data-action="back-home">back</a>
+            <a href="/" class="view-all" data-action="back-home">back</a>
           </div>
           <ul class="list" id="all-posts-list" data-feed="posts"></ul>
         </section>
@@ -83,7 +83,7 @@
         <section class="page-section section games hidden" id="section-games-all">
           <div class="section-head">
             <h2>All Games</h2>
-            <a href="#" class="view-all" data-action="back-home">back</a>
+            <a href="/" class="view-all" data-action="back-home">back</a>
           </div>
           <ul class="list" id="all-games-list" data-feed="games"></ul>
         </section>
@@ -95,7 +95,7 @@
           <div class="feature-card about-card">
             <div class="feature-header">ABOUT</div>
             <div class="feature-body">
-              <div class="feature-window about-window" role="img" aria-label="Frog illustration for Finn Rawlings">
+              <div class="feature-window about-window" id="about-window" role="img" aria-label="Frog illustration for Finn Rawlings">
                 <img src="/images/frog.png" alt="" class="about-image" id="about-image" />
                 <div class="feature-overlay">
 
@@ -148,11 +148,11 @@
 
         <section class="page-section section detail hidden" id="section-detail">
           <div class="section-head detail-head">
-            <h2 class="detail-title">Entry Title</h2>
+            <h2 class="detail-title" id="detail-title">Entry Title</h2>
           </div>
-          <div class="detail-hero">
+          <div class="detail-hero" id="detail-hero">
             <div class="detail-overlay">
-              <div class="detail-meta"></div>
+              <div class="detail-meta" id="detail-meta"></div>
             </div>
             <div class="scanlines"></div>
           </div>

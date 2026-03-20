@@ -97,6 +97,7 @@
 }
 
 .feature-window {
+  display: block;
   position: relative;
   min-height: 240px;
   aspect-ratio: 4 / 3;
@@ -110,6 +111,12 @@
   background-position: center;
   background-repeat: no-repeat;
   background-color: #0f0f0f;
+  color: inherit;
+  text-decoration: none;
+}
+
+.feature-window:hover {
+  text-decoration: none;
 }
 
 .feature-blurb {

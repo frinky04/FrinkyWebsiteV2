@@ -2,11 +2,14 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { defineConfig } from "vite";
 import { generateContent } from "./scripts/generate-content.mjs";
+import { daysAgo, yearsAgo } from "./src/app/date.js";
+import { routeToPath } from "./src/app/routing.js";
 
 const PAGES_GLOB = /[\\/]pages[\\/].*\.md$/;
 const DEFAULT_SITE_URL = "https://frinky.org";
 const DEFAULT_DESCRIPTION = "Frinky's portfolio of games, updates, and development posts.";
 const DEFAULT_IMAGE_PATH = "/images/frog.png";
+const SECTION_IDS = ["home", "posts-all", "games-all", "about", "contact", "detail"];
 
 function escapeHtml(value) {
   return String(value || "")
@@ -38,6 +41,229 @@ function toAbsoluteUrl(base, candidate, fallback = "") {
 function upsertHeadTag(html, regex, tagLine) {
   if (regex.test(html)) return html.replace(regex, tagLine);
   return html.replace("</head>", `  ${tagLine}\n</head>`);
+}
+
+function replaceElementInnerById(html, id, innerHtml) {
+  const pattern = new RegExp(`(<([a-z0-9-]+)[^>]*\\bid=["']${id}["'][^>]*>)([\\s\\S]*?)(</\\2>)`, "i");
+  return html.replace(pattern, (match, openingTag, tagName, currentInner, closingTag) => `${openingTag}${innerHtml}${closingTag}`);
+}
+
+function updateOpeningTagById(html, id, updater) {
+  const pattern = new RegExp(`<([a-z0-9-]+)([^>]*\\bid=["']${id}["'][^>]*)>`, "i");
+  return html.replace(pattern, (match, tagName, attrs) => `<${tagName}${updater(attrs)}>`);
+}
+
+function setAttributeInAttrs(attrs, name, value) {
+  const safeValue = escapeHtml(String(value ?? ""));
+  const pattern = new RegExp(`\\s${name}=(["']).*?\\1`, "i");
+  if (pattern.test(attrs)) {
+    return attrs.replace(pattern, ` ${name}="${safeValue}"`);
+  }
+  return `${attrs} ${name}="${safeValue}"`;
+}
+
+function toggleClassInAttrs(attrs, className, enabled) {
+  const classMatch = attrs.match(/\sclass=(["'])(.*?)\1/i);
+  const classes = new Set(
+    String(classMatch?.[2] || "")
+      .split(/\s+/)
+      .map((value) => value.trim())
+      .filter(Boolean)
+  );
+
+  if (enabled) classes.add(className);
+  else classes.delete(className);
+
+  const classValue = [...classes].join(" ");
+  if (classMatch) {
+    if (!classValue) return attrs.replace(classMatch[0], "");
+    return attrs.replace(classMatch[0], ` class="${escapeHtml(classValue)}"`);
+  }
+  if (!classValue) return attrs;
+  return `${attrs} class="${escapeHtml(classValue)}"`;
+}
+
+function sectionDescription(payload, section) {
+  const siteDescription = payload?.site?.description || DEFAULT_DESCRIPTION;
+
+  switch (section) {
+    case "about":
+      return stripHtml(payload?.about?.contentHtml || "").slice(0, 180) || siteDescription;
+    case "contact":
+      return "Contact Finn Rawlings through email, X, Discord, GitHub, or YouTube.";
+    case "posts-all":
+      return "Posts, updates, and development notes from Frinky.";
+    case "games-all":
+      return "Games built and published by Frinky.";
+    default:
+      return payload?.home?.summary || siteDescription;
+  }
+}
+
+function routeHeadline(section, siteName) {
+  switch (section) {
+    case "about":
+      return `About | ${siteName}`;
+    case "contact":
+      return `Contact | ${siteName}`;
+    case "posts-all":
+      return `Posts | ${siteName}`;
+    case "games-all":
+      return `Games | ${siteName}`;
+    default:
+      return siteName;
+  }
+}
+
+function entryPath(entry) {
+  if (!entry?.slug) return "/";
+  return routeToPath({
+    section: "detail",
+    type: entry.type === "post" ? "post" : "game",
+    slug: entry.slug,
+  });
+}
+
+function outputPathForRoute(outDir, route) {
+  const pathname = routeToPath(route);
+  if (pathname === "/") return path.join(outDir, "index.html");
+  const parts = pathname.replace(/^\/|\/$/g, "");
+  return path.join(outDir, parts, "index.html");
+}
+
+function renderListItems(items, type) {
+  return items
+    .map((item) => {
+      const title = escapeHtml(item.title || item.text || "Untitled");
+      const date = item.date ? `[${escapeHtml(item.date)}]` : "";
+      const meta =
+        type === "experience"
+          ? escapeHtml(item.meta ?? "")
+          : escapeHtml(daysAgo(item.sortDate || item.date) || item.date || item.meta || "");
+
+      const linkHtml =
+        type === "post" || type === "game"
+          ? `<a class="link" href="${escapeHtml(entryPath({ ...item, type }))}">${title}</a>`
+          : `<div class="link">${title}</div>`;
+
+      return [
+        "<li>",
+        `  <div class="date">${date}</div>`,
+        `  ${linkHtml}`,
+        `  <div class="meta">${meta}</div>`,
+        "</li>",
+      ].join("\n");
+    })
+    .join("\n");
+}
+
+function renderFeaturedBlurb(entry) {
+  if (!entry) return "";
+
+  const title = escapeHtml(entry.title || "Untitled");
+  const summary = escapeHtml(entry.summary || "No description available.");
+  const dateText = escapeHtml(entry.date || "");
+  const relative = escapeHtml(daysAgo(entry.sortDate || entry.date));
+  const meta = `${dateText}${relative ? ` (${relative})` : ""}`;
+
+  return [
+    `<div class="feature-blurb-title">${title}</div>`,
+    `<div class="blurb-body">${summary}</div>`,
+    `<div class="detail-meta">${meta}</div>`,
+  ].join("\n");
+}
+
+function renderDetailBody(entry, type) {
+  const contentHtml = entry?.contentHtml || "<p>More details coming soon.</p>";
+  if (type !== "game" || !entry?.downloadUrl) return contentHtml;
+  const downloadUrl = escapeHtml(entry.downloadUrl);
+  return `${contentHtml}\n<a href="${downloadUrl}" target="_blank" rel="noopener noreferrer" class="download-btn">Download / Play</a>`;
+}
+
+function featureStyle(image) {
+  const placeholder = "linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.75) 100%)";
+  if (!image) {
+    return `background-image: ${placeholder}; background-size: cover; background-position: center; background-blend-mode: normal;`;
+  }
+
+  const safeImage = String(image).replace(/'/g, "%27");
+  return `background-image: url('${safeImage}'), ${placeholder}; background-size: cover, cover; background-position: center, center; background-blend-mode: normal, overlay;`;
+}
+
+function detailHeroStyle(image) {
+  const placeholder = "linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.6))";
+  if (!image) {
+    return `background-image: ${placeholder}; background-size: cover; background-position: center; background-blend-mode: overlay;`;
+  }
+
+  const safeImage = String(image).replace(/'/g, "%27");
+  return `background-image: url('${safeImage}'), ${placeholder}; background-size: cover, cover; background-position: center, center; background-blend-mode: overlay, normal;`;
+}
+
+function sectionIdForRoute(route) {
+  if (route.section === "detail") return "detail";
+  return route.section;
+}
+
+function applySharedContent(html, payload) {
+  const siteName = payload?.site?.name || "Frinky";
+  const featured = payload?.featured || payload?.games?.[0] || null;
+  const about = payload?.about || {};
+  const aboutAge = about.birthDate ? yearsAgo(about.birthDate) : null;
+  const aboutSuffix = typeof aboutAge === "number" && aboutAge >= 0 ? ` (${aboutAge} years ago)` : "";
+
+  let output = html;
+  output = replaceElementInnerById(output, "home-intro-content", payload?.home?.contentHtml || "");
+  output = replaceElementInnerById(output, "registry-list", renderListItems((payload?.posts || []).slice(0, 8), "post"));
+  output = replaceElementInnerById(output, "games-list", renderListItems(payload?.games || [], "game"));
+  output = replaceElementInnerById(output, "all-posts-list", renderListItems(payload?.posts || [], "post"));
+  output = replaceElementInnerById(output, "all-games-list", renderListItems(payload?.games || [], "game"));
+  output = replaceElementInnerById(output, "experience-list", renderListItems(payload?.experience || [], "experience"));
+  output = replaceElementInnerById(output, "feature-title", escapeHtml(featured?.title || siteName));
+  output = replaceElementInnerById(output, "feature-blurb", renderFeaturedBlurb(featured));
+  output = replaceElementInnerById(output, "about-name", escapeHtml(about.name || "Finn Rawlings (Frinky)"));
+  output = replaceElementInnerById(output, "about-content", about.contentHtml || "");
+  output = replaceElementInnerById(
+    output,
+    "about-age",
+    about.birthDate ? escapeHtml(`Born ${about.birthDate}${aboutSuffix}`) : ""
+  );
+
+  output = updateOpeningTagById(output, "feature-link", (attrs) => {
+    let next = setAttributeInAttrs(attrs, "href", featured ? entryPath({ ...featured, type: "game" }) : "/games/");
+    next = setAttributeInAttrs(next, "aria-label", featured?.title ? `Open ${featured.title}` : "Browse games");
+    return setAttributeInAttrs(next, "style", featureStyle(featured?.image || DEFAULT_IMAGE_PATH));
+  });
+
+  output = updateOpeningTagById(output, "about-window", (attrs) =>
+    setAttributeInAttrs(attrs, "aria-label", about.imageAlt || "Frog illustration for Finn Rawlings")
+  );
+  output = updateOpeningTagById(output, "about-image", (attrs) => {
+    let next = setAttributeInAttrs(attrs, "src", about.image || DEFAULT_IMAGE_PATH);
+    next = setAttributeInAttrs(next, "alt", about.imageAlt || "");
+    return next;
+  });
+
+  return output;
+}
+
+function applyRouteVisibility(html, route) {
+  const visibleSectionId = sectionIdForRoute(route);
+  return SECTION_IDS.reduce((output, sectionId) => {
+    const isVisible = sectionId === visibleSectionId;
+    return updateOpeningTagById(output, `section-${sectionId}`, (attrs) => toggleClassInAttrs(attrs, "hidden", !isVisible));
+  }, html);
+}
+
+function applyDetailContent(html, entry, type) {
+  if (!entry || !type) return html;
+
+  let output = html;
+  output = replaceElementInnerById(output, "detail-title", escapeHtml(entry.title || "Untitled"));
+  output = replaceElementInnerById(output, "detail-meta", escapeHtml(entry.date || entry.meta || ""));
+  output = replaceElementInnerById(output, "detail-body", renderDetailBody(entry, type));
+  output = updateOpeningTagById(output, "detail-hero", (attrs) => setAttributeInAttrs(attrs, "style", detailHeroStyle(entry.image)));
+  return output;
 }
 
 function injectRouteSeo(indexHtml, meta) {
@@ -76,46 +302,95 @@ function injectRouteSeo(indexHtml, meta) {
   return html.replace("</head>", `${block}\n</head>`);
 }
 
-async function generateSocialRoutePages({ outDir, indexHtml, payload, logger }) {
+function buildRouteMeta(route, payload, entry) {
   const siteName = payload?.site?.name || "Frinky";
   const siteUrl = payload?.site?.url || DEFAULT_SITE_URL;
   const siteDescription = payload?.site?.description || DEFAULT_DESCRIPTION;
+
+  if (route.section === "detail" && entry) {
+    const url = toAbsoluteUrl(siteUrl, routeToPath(route));
+    const image = toAbsoluteUrl(siteUrl, entry.image || DEFAULT_IMAGE_PATH, DEFAULT_IMAGE_PATH);
+    return {
+      siteName,
+      title: `${entry.title || "Untitled"} | ${siteName}`,
+      description: String(entry.summary || stripHtml(entry.contentHtml).slice(0, 180) || siteDescription),
+      url,
+      image,
+      ogType: route.type === "post" ? "article" : "website",
+      twitterCard: image ? "summary_large_image" : "summary",
+    };
+  }
+
+  const routePath = routeToPath(route);
+  const url = toAbsoluteUrl(siteUrl, routePath);
+  const sectionImageSource =
+    route.section === "about"
+      ? payload?.about?.image || DEFAULT_IMAGE_PATH
+      : payload?.featured?.image || payload?.about?.image || DEFAULT_IMAGE_PATH;
+  const image = toAbsoluteUrl(
+    siteUrl,
+    sectionImageSource,
+    DEFAULT_IMAGE_PATH
+  );
+
+  return {
+    siteName,
+    title: routeHeadline(route.section, siteName),
+    description: sectionDescription(payload, route.section),
+    url,
+    image,
+    ogType: "website",
+    twitterCard: image ? "summary_large_image" : "summary",
+  };
+}
+
+function buildPrerenderedRouteHtml(indexHtml, payload, route, entry) {
+  const meta = buildRouteMeta(route, payload, entry);
+  let html = injectRouteSeo(indexHtml, meta);
+  html = applySharedContent(html, payload);
+  html = applyRouteVisibility(html, route);
+
+  if (route.section === "detail") {
+    html = applyDetailContent(html, entry, route.type);
+  }
+
+  return html;
+}
+
+async function generateRoutePages({ outDir, indexHtml, payload, logger }) {
   const posts = Array.isArray(payload?.posts) ? payload.posts : [];
   const games = Array.isArray(payload?.games) ? payload.games : [];
-  const entries = [
-    ...posts.map((entry) => ({ ...entry, type: "post" })),
-    ...games.map((entry) => ({ ...entry, type: "game" })),
+  const staticRoutes = [
+    { section: "home" },
+    { section: "about" },
+    { section: "contact" },
+    { section: "posts-all" },
+    { section: "games-all" },
+  ];
+  const detailRoutes = [
+    ...posts.map((entry) => ({ route: { section: "detail", type: "post", slug: entry.slug }, entry: { ...entry, type: "post" } })),
+    ...games.map((entry) => ({ route: { section: "detail", type: "game", slug: entry.slug }, entry: { ...entry, type: "game" } })),
   ];
 
   let written = 0;
 
-  for (const entry of entries) {
-    const slug = String(entry.slug || "").trim();
-    if (!slug) continue;
-
-    const section = entry.type === "post" ? "posts" : "games";
-    const routePath = `/${section}/${slug}/`;
-    const url = toAbsoluteUrl(siteUrl, routePath);
-    const title = `${entry.title || "Untitled"} | ${siteName}`;
-    const description = String(entry.summary || stripHtml(entry.contentHtml).slice(0, 180) || siteDescription);
-    const image = toAbsoluteUrl(siteUrl, entry.image || DEFAULT_IMAGE_PATH, DEFAULT_IMAGE_PATH);
-    const routeHtml = injectRouteSeo(indexHtml, {
-      siteName,
-      title,
-      description,
-      url,
-      image,
-      ogType: entry.type === "post" ? "article" : "website",
-      twitterCard: image ? "summary_large_image" : "summary",
-    });
-
-    const outputPath = path.join(outDir, section, slug, "index.html");
+  for (const route of staticRoutes) {
+    const outputPath = outputPathForRoute(outDir, route);
+    const routeHtml = buildPrerenderedRouteHtml(indexHtml, payload, route, null);
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, routeHtml, "utf8");
     written += 1;
   }
 
-  logger?.info(`[content] generated social route html (${written} pages)`);
+  for (const { route, entry } of detailRoutes) {
+    const outputPath = outputPathForRoute(outDir, route);
+    const routeHtml = buildPrerenderedRouteHtml(indexHtml, payload, route, entry);
+    await fs.mkdir(path.dirname(outputPath), { recursive: true });
+    await fs.writeFile(outputPath, routeHtml, "utf8");
+    written += 1;
+  }
+
+  logger?.info(`[content] generated prerendered route html (${written} pages)`);
 }
 
 function contentPlugin() {
@@ -153,7 +428,7 @@ function contentPlugin() {
       }
 
       const payload = latestPayload || (await rebuild(this.__logger));
-      await generateSocialRoutePages({
+      await generateRoutePages({
         outDir,
         indexHtml,
         payload,
