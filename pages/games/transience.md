@@ -3,7 +3,6 @@ title: Transience
 slug: transience
 date: 05 Dec 2025
 sortDate: "2025-12-05"
-featured: true
 image: images/transience_screenshot.png
 downloadUrl: https://store.steampowered.com/app/2124100/Transience/
 summary: Become an Accountant - a hired mercenary who keeps the books balanced by any means necessary.

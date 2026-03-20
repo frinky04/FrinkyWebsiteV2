@@ -1,7 +1,27 @@
+import { parseDateInputToEpoch } from "./date-parse.js";
+
+function compareEntries(a, b) {
+  if (a?.pinned !== b?.pinned) return a?.pinned ? -1 : 1;
+
+  const aHasOrder = typeof a?.order === "number";
+  const bHasOrder = typeof b?.order === "number";
+  if (aHasOrder && bHasOrder && a.order !== b.order) {
+    return a.order - b.order;
+  }
+  if (aHasOrder !== bHasOrder) return aHasOrder ? -1 : 1;
+
+  const aEpoch = parseDateInputToEpoch(a?.sortDate || a?.date);
+  const bEpoch = parseDateInputToEpoch(b?.sortDate || b?.date);
+  if (aEpoch !== bEpoch) return bEpoch - aEpoch;
+
+  return String(a?.title || "").localeCompare(String(b?.title || ""));
+}
+
 export function createModel(content) {
   const posts = content?.posts || [];
   const games = content?.games || [];
-  const featured = content?.featured || games.find((item) => item.featured) || games[0] || null;
+  const featuredCandidates = [...posts, ...games].filter((item) => item.featured).sort(compareEntries);
+  const featured = content?.featured || featuredCandidates[0] || games[0] || posts[0] || null;
 
   const home = content?.home || {
     title: "Home",

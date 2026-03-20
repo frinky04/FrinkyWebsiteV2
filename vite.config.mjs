@@ -150,7 +150,7 @@ function sectionIdForRoute(route) {
 
 function applySharedContent(html, payload) {
   const siteName = payload?.site?.name || "Frinky";
-  const featured = payload?.featured || payload?.games?.[0] || null;
+  const featured = payload?.featured || payload?.games?.[0] || payload?.posts?.[0] || null;
   const about = payload?.about || {};
 
   let output = html;
@@ -172,8 +172,9 @@ function applySharedContent(html, payload) {
   }
 
   output = updateOpeningTagById(output, "feature-link", (attrs) => {
-    let next = setAttributeInAttrs(attrs, "href", featured ? entryPath({ ...featured, type: "game" }) : "/games/");
-    next = setAttributeInAttrs(next, "aria-label", featured?.title ? `Open ${featured.title}` : "Browse games");
+    const fallbackPath = payload?.games?.length ? "/games/" : payload?.posts?.length ? "/posts/" : "/";
+    let next = setAttributeInAttrs(attrs, "href", featured ? entryPath(featured) : fallbackPath);
+    next = setAttributeInAttrs(next, "aria-label", featured?.title ? `Open ${featured.title}` : "Browse content");
     return setAttributeInAttrs(next, "style", featureStyle(featured?.image || DEFAULT_IMAGE_PATH));
   });
 

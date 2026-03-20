@@ -643,8 +643,8 @@ export async function generateContent() {
 
   const posts = bucket.post.sort(compareEntries);
   const games = bucket.game.sort(compareEntries);
-  const featuredCandidates = games.filter((item) => item.featured).sort(compareEntries);
-  const featured = featuredCandidates[0] || games[0] || null;
+  const featuredCandidates = [...posts, ...games].filter((item) => item.featured).sort(compareEntries);
+  const featured = featuredCandidates[0] || games[0] || posts[0] || null;
 
   const home = await readHomePage();
   const about = await readAboutPage();

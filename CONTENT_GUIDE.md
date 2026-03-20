@@ -198,9 +198,10 @@ Applied in this order:
 3. `sortDate` descending (fallback to `date` parse)
 4. `title` alphabetical
 
-Featured game selection:
-- first game with `featured: true` after sorting
+Featured entry selection:
+- first post or game with `featured: true` after sorting across both collections
 - otherwise first game in sorted list
+- otherwise first post in sorted list if there are no games
 
 ## Markdown Support
 

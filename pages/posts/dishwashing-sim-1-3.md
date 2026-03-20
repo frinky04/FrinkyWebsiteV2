@@ -5,6 +5,7 @@ image: images/1.3_update.png
 date: 20 Mar 2025
 sortDate: "2026-3-20"
 summary: Achievements, QoL, and Bug Squashing
+featured: true
 
 ---
 
